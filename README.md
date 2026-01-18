@@ -1,2 +1,0 @@
-# SKH_WEB_PROJECT_FRONTEND
-Frontend code for SKH WEB PROJECT 
