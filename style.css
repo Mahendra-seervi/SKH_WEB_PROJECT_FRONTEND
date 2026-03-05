@@ -67,7 +67,7 @@
 }
 
 .navbar a:hover{
-  font-weight: 600;
+  color:#007cc4;
 }
 
 @media(max-Width :860px){
