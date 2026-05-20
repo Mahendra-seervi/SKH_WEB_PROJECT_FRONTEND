@@ -1,0 +1,64 @@
+<% layout('/layout/boilerplate.ejs') -%>
+
+<section class="warden-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold">Hostel Administration</h1>
+            <div class="header-underline"></div>
+        </div>
+
+        <% if (warden && warden.length > 0) { %>
+            <% let w = warden[0]; %>
+
+            <div class="warden-card-premium mx-auto">
+                <div class="row g-0 align-items-center">
+                    
+                    <div class="col-lg-5 text-center p-4">
+                        <div class="warden-image-circle">
+                            <img src="<%= w.photo %>" alt="<%= w.name %>">
+                        </div>
+                    </div>
+
+                    <div class="col-lg-7 p-4 p-md-5">
+                        <div class="warden-badge">Official Warden</div>
+                        
+                        <h2 class="warden-name-text mb-1"><%= w.name %></h2>
+                        <p class="warden-sub-desc text-muted mb-4"><%= w.discription %></p>
+
+                        <div class="warden-contact-grid mb-4">
+                            <div class="contact-item">
+                                <div class="contact-icon"><i class="fa-solid fa-phone"></i></div>
+                                <div>
+                                    <small>Phone</small>
+                                    <p><%= w.phone %></p>
+                                </div>
+                            </div>
+
+                            <div class="contact-item">
+                                <div class="contact-icon"><i class="fa-solid fa-envelope"></i></div>
+                                <div>
+                                    <small>Email</small>
+                                    <p><%= w.email %></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-3">
+                            <a href="tel:<%= w.phone %>" class="btn btn-warden-action">
+                                <i class="fa-solid fa-phone-flip me-2"></i> Call Now
+                            </a>
+                            <a href="mailto:<%= w.email %>" class="btn btn-warden-action">
+                                <i class="fa-solid fa-paper-plane me-2"></i> Send Mail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="no-data-card text-center p-5">
+                <i class="fa-solid fa-user-slash fa-3x mb-3 text-muted"></i>
+                <h3>No Warden Information Found</h3>
+            </div>
+        <% } %>
+    </div>
+</section>

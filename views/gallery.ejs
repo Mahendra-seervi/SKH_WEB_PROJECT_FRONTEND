@@ -1,0 +1,37 @@
+<% layout('/layout/boilerplate.ejs') -%>
+
+<section class="gallery-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold">Hostel Gallery</h1>
+            <div class="header-underline"></div>
+        </div>
+
+        <div class="row g-4">
+            <% if (images && images.length > 0) { %>
+                <% images.forEach(img => { %>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                        <a href="<%= img.image %>" class="gallery-link">
+                            <div class="gallery-card">
+                                <div class="gallery-img-box">
+                                    <img src="<%= img.image %>" alt="<%= img.title %>" loading="lazy">
+                                    <div class="gallery-overlay">
+                                        <i class="fa-solid fa-magnifying-glass-plus"></i>
+                                        <span>View Photo</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Sari images ko lightbox se connect karne ke liye
+        new LuminousGallery(document.querySelectorAll(".gallery-link"));
+    });
+</script>

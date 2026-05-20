@@ -1,0 +1,125 @@
+<% layout('/layout/admissionLayout.ejs') -%>
+
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="text-center mb-4">
+            <img src="/SKH_logo.jpg" alt="Logo" style="width: 80px;" class="mb-2">
+            <h2 class="fw-bold text-teal">सीरवी किसान छात्रावास, पाली</h2>
+            <p class="text-muted">नया प्रवेश आवेदन फॉर्म (सत्र 2026-27)</p>
+        </div>
+
+        <form action="/apply" method="POST" enctype="multipart/form-data" class="form-card bg-white p-4 p-md-5 mb-5">
+            
+            <div class="mb-5">
+                <h5 class="fw-bold border-bottom pb-2 text-teal mb-4"><i class="fa-solid fa-user me-2"></i> व्यक्तिगत विवरण (Personal Details)</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">विद्यार्थी का नाम *</label>
+                        <input type="text" name="student[name]" class="form-control" placeholder="पूरा नाम लिखें" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">पिता का नाम *</label>
+                        <input type="text" name="student[Father_Name]" class="form-control" placeholder="पिता का नाम लिखें" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">जन्म तिथि (DOB) *</label>
+                        <input type="date" name="student[DOB]" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">गोत्र (Goatr) *</label>
+                        <input type="text" name="student[goatr]" class="form-control" placeholder="अपना गोत्र लिखें" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">रक्त समूह (Blood Group) *</label>
+                        <select name="student[Blood]" class="form-select" required>
+                            <option value="">चुनें...</option>
+                            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                            <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">वजन (Weight) *</label>
+                        <input type="text" name="student[weight]" class="form-control" placeholder="उदा: 55kg" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">टी-शर्ट साइज *</label>
+                        <select name="student[t_shirt]" class="form-select" required>
+                            <option value="">चुनें...</option>
+                            <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <h5 class="fw-bold border-bottom pb-2 text-teal mb-4"><i class="fa-solid fa-phone me-2"></i> संपर्क विवरण</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">विद्यार्थी का मोबाइल *</label>
+                        <input type="number" name="student[Phone_student]" class="form-control" placeholder="10 अंकों का नंबर" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">पिता का मोबाइल *</label>
+                        <input type="number" name="student[Phone_father]" class="form-control" placeholder="पिता का नंबर" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">ईमेल (Email)</label>
+                        <input type="email" name="student[Email]" class="form-control" placeholder="abc@gmail.com">
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label">पूरा पता (Address) *</label>
+                        <textarea name="student[Address]" class="form-control" rows="2" required></textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">पिनकोड *</label>
+                        <input type="number" name="student[Pincode]" class="form-control" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-5 p-3 bg-light rounded-3 shadow-sm">
+                <h5 class="fw-bold text-teal mb-4"><i class="fa-solid fa-file-shield me-2"></i> दस्तावेज एवं सुरक्षा</h5>
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label class="form-label text-danger fw-bold">आधार नंबर * (यह सुरक्षित रहेगा)</label>
+                        <input type="text" name="student[Aadhar]" class="form-control" maxlength="12" placeholder="1234 5678 9012" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label font-monospace">अपनी फोटो अपलोड करें *</label>
+                        <input type="file" name="photo" class="form-control" accept="image/*" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <h5 class="fw-bold border-bottom pb-2 text-teal mb-4"><i class="fa-solid fa-graduation-cap me-2"></i> शैक्षणिक विवरण</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">वर्तमान योग्यता *</label>
+                        <input type="text" name="student[Qualification]" class="form-control" placeholder="उदा: 12th Pass" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">पिछला स्कूल/कॉलेज *</label>
+                        <input type="text" name="student[last_institute]" class="form-control" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">अभी किस कॉलेज में हैं? *</label>
+                        <input type="text" name="student[Current_institute]" class="form-control" required>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4">
+            <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" name="acceptpolicy" id="policy" required>
+                <label class="form-check-label small" for="policy">
+                    मैं प्रमाणित करता हूँ कि ऊपर दी गई जानकारी सही है और मैं छात्रावास के <a href="/rules" target="_blank">नियमों</a> का पालन करने के लिए सहमत हूँ।
+                </label>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-teal btn-lg w-100">आवेदन जमा करें (Submit Application)</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,472 @@
+<% layout('/layout/admin-lyout.ejs') -%>
+
+<style>
+    :root {
+        --skh-primary: #007A83;
+        --skh-primary-light: #e6f5f6;
+        --skh-dark: #1e293b;
+        --skh-border: #e2e8f0;
+        --skh-bg: #f8fafc;
+        --skh-success: #10b981;
+        --skh-success-light: #ecfdf5;
+        --skh-danger: #ef4444;
+        --skh-danger-light: #fef2f2;
+    }
+
+    body {
+        background-color: var(--skh-bg);
+    }
+
+    /* Fixed Box heights to keep both top widgets same size */
+    .equal-height-card {
+        height: 145px !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .ledger-card {
+        background: #ffffff;
+        border: 1px solid var(--skh-border);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+
+    .ledger-card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+        border-color: #cbd5e1;
+    }
+
+    .config-box {
+        background: #ffffff;
+        border-left: 5px solid var(--skh-primary);
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .custom-input {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+        height: 38px !important; /* Forces all inputs to stay same height */
+    }
+
+    .custom-input:focus {
+        border-color: var(--skh-primary);
+        box-shadow: 0 0 0 3px rgba(0, 122, 131, 0.15);
+        outline: none;
+    }
+
+    /* Strict Column Locking Structure for Symmetrical Tables */
+    .custom-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        table-layout: fixed; /* Ensures every table grid shares exact same widths */
+    }
+
+    .custom-table th, .custom-table td {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--skh-border);
+        color: #334155;
+        font-size: 0.875rem;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .custom-table th {
+        background-color: var(--skh-bg);
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+
+    .badge-paid {
+        background-color: var(--skh-success-light);
+        color: var(--skh-success);
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .badge-unpaid {
+        background-color: var(--skh-danger-light);
+        color: var(--skh-danger);
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-skh-primary {
+        background-color: var(--skh-primary);
+        color: white;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: background 0.2s;
+        border: none;
+        height: 38px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-skh-primary:hover {
+        background-color: #005a61;
+        color: white;
+    }
+
+    .btn-skh-warning {
+        background-color: #fffbeb;
+        color: #b45309;
+        border: 1px solid #fde68a;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    .btn-skh-warning:hover {
+        background-color: #fef3c7;
+        color: #b45309;
+    }
+
+    .custom-checkbox {
+        width: 17px;
+        height: 17px;
+        border-radius: 4px;
+        border: 1px solid #cbd5e1;
+        cursor: pointer;
+    }
+</style>
+
+<div class="container-fluid py-4 px-4" style="max-width: 1400px;">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
+        <div>
+            <h3 class="fw-bold text-slate-800 m-0" style="color: var(--skh-dark);">शुल्क बहीखाता (Fee Ledger Console)</h3>
+            <p class="text-muted small m-0">छात्रों के मासिक छात्रावास एवं पुस्तकालय शुल्क का प्रबंधन करें।</p>
+        </div>
+        <span class="badge px-3 py-2 fw-bold text-dark" style="background: #e2e8f0; border-radius: 8px;">सत्र: <%= currentMonth %></span>
+    </div>
+
+    <div class="row g-4 mb-4 d-print-none">
+        <div class="col-lg-5">
+            <div class="card p-4 config-box equal-height-card border-0">
+                <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-sliders text-muted me-2"></i>मासिक शुल्क दरें सेट करें</h6>
+                <form action="/admin/payments/update-config" method="POST" class="row g-2 align-items-end">
+                    <div class="col-4">
+                        <label class="small fw-semibold text-muted mb-1" style="font-size:11px;">भोजन शुल्क</label>
+                        <input type="number" name="messFee" class="form-control custom-input fw-bold w-100" value="<%= paymentsettings.currentMessFee %>" required>
+                    </div>
+                    <div class="col-4">
+                        <label class="small fw-semibold text-muted mb-1" style="font-size:11px;">पुस्तकालय शुल्क</label>
+                        <input type="number" name="libraryFee" class="form-control custom-input fw-bold w-100" value="<%= paymentsettings.currentLibraryFee %>" required>
+                    </div>
+                    <div class="col-4">
+                        <button type="submit" class="btn btn-skh-primary btn-sm w-100">अपडेट करें</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card p-4 equal-height-card border-0 shadow-sm" style="border-radius: 12px;">
+                <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-chart-pie text-muted me-2"></i>लाइव वित्तीय विश्लेषण (Global Summary)</h6>
+                <% 
+                    let totalPaid = 0; 
+                    let totalUnpaid = 0; 
+                    studentLedger.forEach(item => {
+                        totalPaid += item.totalPaid;
+                        totalUnpaid += item.totalUnpaid;
+                    });
+                %>
+                <div class="row g-3 text-center">
+                    <div class="col-6">
+                        <div class="py-2 px-3 rounded-3" style="background-color: var(--skh-success-light);">
+                            <div class="small fw-bold text-muted text-uppercase" style="font-size: 10px;">कुल प्राप्त शुल्क</div>
+                            <h3 class="fw-bold m-0 text-success">₹<%= totalPaid %></h3>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="py-2 px-3 rounded-3" style="background-color: var(--skh-danger-light);">
+                            <div class="small fw-bold text-muted text-uppercase" style="font-size: 10px;">कुल बकाया राशि</div>
+                            <h3 class="fw-bold m-0 text-danger">₹<%= totalUnpaid %></h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-3 border-0 shadow-sm mb-4 d-print-none" style="border-radius: 12px;">
+        <form action="/admin/payments" method="GET" class="row g-2 align-items-end">
+            <div class="col-md-6">
+                <label class="small fw-semibold text-muted mb-1"><i class="fa-solid fa-magnifying-glass me-1"></i> छात्र सर्च</label>
+                <input type="text" name="search" class="form-control custom-input w-100" placeholder="छात्र का नाम या उसकी SKH ID खोजें..." value="<%= searchQuery %>">
+            </div>
+            <div class="col-md-4">
+                <label class="small fw-semibold text-muted mb-1"><i class="fa-solid fa-filter me-1"></i> भुगतान स्थिति</label>
+                <select name="status" class="form-select custom-input fw-semibold w-100" onchange="this.form.submit()">
+                    <option value="All" <%= statusFilter === 'All' ? 'selected' : '' %>>सभी रिकॉर्ड्स (Paid + Unpaid)</option>
+                    <option value="Unpaid" <%= statusFilter === 'Unpaid' ? 'selected' : '' %>>🔴 केवल बकाया (Unpaid)</option>
+                    <option value="Paid" <%= statusFilter === 'Paid' ? 'selected' : '' %>>🟢 केवल प्राप्त (Paid)</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-skh-primary btn-sm px-4 flex-grow-1">खोजें</button>
+                <% if(searchQuery || statusFilter !== 'All') { %>
+                    <a href="/admin/payments" class="btn btn-light border d-flex align-items-center justify-content-center px-3" style="border-radius: 8px; height: 38px;"><i class="fa-solid fa-rotate-left"></i></a>
+                <% } %>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        <% if(studentLedger && studentLedger.length > 0) { %>
+            <% studentLedger.forEach(item => { %>
+                <div class="col-12" id="student-block-<%= item.student._id %>">
+                    <div class="card ledger-card border-0">
+                        
+                        <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center border" style="width: 42px; height: 42px; background: var(--skh-primary-light) !important;">
+                                    <% if(item.student.photo) { %>
+                                            <img src="<%= item.student.photo %>" alt="<%= item.student.name %>" class="rounded-circle border" style="width: 48px; height: 48px; object-fit: cover; border-color: var(--skh-border) !important; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                        <% } else { %>
+                                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center border" style="width: 48px; height: 48px; background: var(--skh-primary-light) !important;">
+                                                <i class="fa-solid fa-user-graduate" style="color: var(--skh-primary) !important; font-size: 18px;"></i>
+                                            </div>
+                                        <% } %>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold m-0 text-dark" style="font-size: 15px;"><%= item.student.name %></h5>
+                                    <div class="text-muted mt-0.5" style="font-size: 11.5px;">
+                                        <span class="badge bg-light text-dark border me-1">ID: <b><%= item.student.username %></b></span>
+                                        <span>पिता: <b><%= item.student.Father_Name %></b></span>
+                                        <span class="mx-1.5">|</span>
+                                        <span>कमरा: <b><%= item.student.room || 'Not Set' %></b></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-print-none">
+                                <button type="button" onclick="printSelectedFees('<%= item.student._id %>', '<%= item.student.name %>', '<%= item.student.username %>')" class="btn btn-skh-warning btn-sm px-3 py-1.5" style="font-size: 12px;">
+                                    <i class="fa-solid fa-print me-1"></i> प्रिंट सिलेक्टेड
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="custom-table" id="table-<%= item.student._id %>">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%;" class="text-center d-print-none">
+                                            <input type="checkbox" class="form-check-input custom-checkbox" onclick="toggleSelectAll(this, '<%= item.student._id %>')">
+                                        </th>
+                                        <th style="width: 25%;">शुल्क विवरण (Particulars)</th>
+                                        <th style="width: 15%;">सत्र/महीना</th>
+                                        <th style="width: 12%;">राशि</th>
+                                        <th style="width: 13%;">स्थिति</th>
+                                        <th style="width: 15%;">रसीद विवरण</th>
+                                        <th style="width: 15%; text-align: center;" class="d-print-none">त्वरित कार्रवाई</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if(item.payments && item.payments.length > 0) { %>
+                                        <% item.payments.forEach(pay => { %>
+                                            <tr class="fee-row-item">
+                                                <td class="text-center d-print-none">
+                                                    <input type="checkbox" class="form-check-input custom-checkbox fee-checkbox" 
+                                                           data-type="<%= pay.type %>" 
+                                                           data-month="<%= pay.month %>" 
+                                                           data-amount="<%= pay.amount %>" 
+                                                           data-status="<%= pay.status %>"
+                                                           data-receipt="<%= pay.transactionId || 'SYS-GEN' %>"
+                                                           data-date="<%= pay.date ? new Date(pay.date).toLocaleDateString('hi-IN') : '' %>">
+                                                </td>
+                                                <td class="fw-bold text-dark"><%= pay.type %></td>
+                                                <td class="text-secondary fw-semibold"><%= pay.month %></td>
+                                                <td class="fw-bold text-dark">₹<%= pay.amount %></td>
+                                                <td>
+                                                    <% if(pay.status === 'Paid') { %>
+                                                        <span class="badge-paid"><i class="fa-solid fa-circle-check me-1"></i> Paid</span>
+                                                    <% } else { %>
+                                                        <span class="badge-unpaid"><i class="fa-solid fa-circle-exclamation me-1"></i> Unpaid</span>
+                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <% if(pay.status === 'Paid') { %>
+                                                        <span class="fw-bold text-dark d-block" style="font-size: 12px;"><%= pay.transactionId || 'SYS-GEN' %></span>
+                                                        <small class="text-muted" style="font-size: 10.5px;"><%= pay.date ? new Date(pay.date).toLocaleDateString('hi-IN') : '' %></small>
+                                                    <% } else { %>
+                                                        <span class="text-muted small">—</span>
+                                                    <% } %>
+                                                </td>
+                                                <td class="text-center d-print-none">
+                                                    <% if(pay.status === 'Unpaid') { %>
+                                                        <form action="/admin/payments/collect/<%= pay._id %>" method="POST" class="d-flex gap-1 align-items-center m-0 justify-content-center">
+                                                            <input type="text" name="transactionId" class="form-control form-control-sm custom-input py-1 px-2 text-center" placeholder="रसीद संख्या" style="width: 100px; height: 30px !important; font-size: 11px;" required>
+                                                            <button type="submit" class="btn btn-skh-primary btn-sm px-2.5" style="height: 30px !important; font-size: 11px;">Pay</button>
+                                                        </form>
+                                                    <% } else { %>
+                                                        <span class="text-success small fw-bold" style="font-size: 11.5px;"><i class="fa-solid fa-shield-check me-1"></i> Verified</span>
+                                                    <% } %>
+                                                </td>
+                                            </tr>
+                                        <% }) %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-3 small">इस छात्र का कोई शुल्क इतिहास दर्ज नहीं मिला।</td>
+                                        </tr>
+                                    <% } %>
+                                    
+                                    <tr style="background-color: #fafafa;">
+                                        <td class="d-print-none"></td>
+                                        <td colspan="2" class="text-end fw-semibold text-muted small">प्राप्त हो चुका शुल्क (Total Settled):</td>
+                                        <td class="text-success fw-bold" colspan="4">₹<%= item.totalPaid %></td>
+                                    </tr>
+                                    <tr style="background-color: var(--skh-danger-light);">
+                                        <td class="d-print-none"></td>
+                                        <td colspan="2" class="text-end fw-bold text-danger small">कुल बकाया राशि (Total Outstanding Dues):</td>
+                                        <td class="text-danger fw-bold" colspan="4">₹<%= item.totalUnpaid %></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="col-12 text-center text-muted py-5 fw-semibold bg-white rounded-3 shadow-sm border">
+                <i class="fa-solid fa-folder-open text-muted fa-2x mb-2 d-block"></i>
+                कोई भी मिलान रिकॉर्ड बहीखाता में दर्ज नहीं मिला!
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    // Toggle Select All logic
+    function toggleSelectAll(master, studentId) {
+        const checkboxes = document.querySelectorAll(`#table-${studentId} .fee-checkbox`);
+        checkboxes.forEach(cb => {
+            cb.checked = master.checked;
+        });
+    }
+
+    // Print Logic mapping custom template frame
+    function printSelectedFees(studentId, studentName, skhId) {
+        const selectedCheckboxes = document.querySelectorAll(`#table-${studentId} .fee-checkbox:checked`);
+        
+        if (selectedCheckboxes.length === 0) {
+            alert("कृपया प्रिंट करने के लिए कम से कम एक शुल्क विवरण (Checkbox) को सिलेक्ट करें!");
+            return;
+        }
+
+        let printRowsHtml = "";
+        let grandTotal = 0;
+
+        selectedCheckboxes.forEach(cb => {
+            const type = cb.getAttribute('data-type');
+            const month = cb.getAttribute('data-month');
+            const amount = parseFloat(cb.getAttribute('data-amount'));
+            const status = cb.getAttribute('data-status');
+            const receipt = cb.getAttribute('data-receipt');
+            const date = cb.getAttribute('data-date');
+
+            grandTotal += amount;
+
+            printRowsHtml += `
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #cbd5e1; font-weight: bold; color: #1e293b;">${type}</td>
+                    <td style="padding: 12px; border: 1px solid #cbd5e1; color: #475569;">${month}</td>
+                    <td style="padding: 12px; border: 1px solid #cbd5e1; text-align: center;"><span style="padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; ${status === 'Paid' ? 'background:#ecfdf5; color:#10b981;' : 'background:#fef2f2; color:#ef4444;'}">${status}</span></td>
+                    <td style="padding: 12px; border: 1px solid #cbd5e1; text-align: center; font-weight: 500;">${status === 'Paid' ? receipt : '-'}</td>
+                    <td style="padding: 12px; border: 1px solid #cbd5e1; text-align: right; font-weight: bold; color: #1e293b;">₹${amount}</td>
+                </tr>
+            `;
+        });
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>शुल्क रसीद - ${studentName}</title>
+                <style>
+                    body { font-family: 'Segoe UI', system-ui, sans-serif; padding: 40px; color: #1e293b; background: #fff; }
+                    .wrapper { max-width: 750px; margin: auto; border: 1px solid #e2e8f0; padding: 30px; border-radius: 12px; }
+                    .header { text-align: center; border-bottom: 3px double #007A83; padding-bottom: 20px; margin-bottom: 25px; }
+                    .title { margin: 0; color: #007A83; font-size: 28px; font-weight: 800; letter-spacing: 0.5px; }
+                    .meta-info { width: 100%; margin-bottom: 25px; font-size: 14px; border-collapse: collapse; }
+                    .meta-info td { padding: 4px 0; }
+                    .receipt-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 14px; }
+                    .receipt-table th { background-color: #007A83; color: white; padding: 12px; font-weight: 600; text-align: left; }
+                    .total-row { background-color: #f8fafc; font-size: 16px; font-weight: bold; }
+                    .footer-sig { margin-top: 60px; display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; }
+                </style>
+            </head>
+            <body>
+                <div class="wrapper">
+                    <div class="header">
+                        <h1 class="title">सीरवी किसान छात्रावास, पाली</h1>
+                        <p style="margin: 6px 0 0 0; color: #64748b; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">छात्र आधिकारिक शुल्क विवरण / भुगतान रसीद</p>
+                    </div>
+                    
+                    <table class="meta-info">
+                        <tr>
+                            <td><b>छात्र का नाम:</b> ${studentName}</td>
+                            <td style="text-align: right;"><b>SKH ID (Username):</b> <span style="color:#ef4444; font-weight:bold;">${skhId}</span></td>
+                        </tr>
+                        <tr>
+                            <td><b>विवरण दिनांक:</b> ${new Date().toLocaleDateString('hi-IN')}</td>
+                            <td style="text-align: right;"><b>जारीकर्ता:</b> मुख्य वार्डन कार्यालय (SKH)</td>
+                        </tr>
+                    </table>
+
+                    <table class="receipt-table">
+                        <thead>
+                            <tr>
+                                <th style="border-top-left-radius: 6px;">शुल्क का प्रकार</th>
+                                <th>महीना / सत्र</th>
+                                <th style="text-align: center;">स्थिति</th>
+                                <th style="text-align: center;">रसीद संख्या</th>
+                                <th style="text-align: right; border-top-right-radius: 6px; padding-right:15px;">राशि</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${printRowsHtml}
+                            <tr class="total-row">
+                                <td colspan="4" style="padding: 14px; text-align: right; border: 1px solid #cbd5e1; color: #e63946;">कुल चयनित राशि (Total Selected Amount):</td>
+                                <td style="padding: 14px; text-align: right; border: 1px solid #cbd5e1; color: #e63946; padding-right:15px;">₹${grandTotal}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="footer-sig">
+                        <div><p style="border-top: 1px dashed #64748b; padding-top: 8px; width: 140px; text-align: center;">छात्र हस्ताक्षर</p></div>
+                        <div style="text-align: right;"><p style="border-top: 1px dashed #64748b; padding-top: 8px; width: 180px; text-align: center;">अधिकृत हस्ताक्षर (SKH)</p></div>
+                    </div>
+                </div>
+
+                <script>
+                    window.onload = function() { window.print(); window.close(); }
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+</script>

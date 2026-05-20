@@ -1,0 +1,702 @@
+<% layout('layout/admin-lyout') -%>
+
+
+
+<div class="container py-4">
+    <div class="d-flex gap-2 mb-3 pb-2 border-bottom border-light d-print-none">
+            <button onclick="printStudentInfo()" class="btn btn-primary btn-sm fw-bold px-3 rounded-3 shadow-sm">
+                <i class="fa-solid fa-print me-1"></i> Student Info Print
+            </button>
+            <button onclick="printAdmissionForm()" class="btn btn-success btn-sm fw-bold px-3 rounded-3 shadow-sm">
+                <i class="fa-solid fa-file-invoice me-1"></i> Admission Form Print
+            </button>
+        </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-center bg-white p-3 rounded-4 shadow-sm mb-4 border-start border-teal border-5">
+        <div class="d-flex align-items-center">
+            <div class="position-relative">
+                <img src="<%= student.photo %>" class="rounded-circle border border-3 border-teal me-3 shadow-sm" width="90" height="90" style="object-fit: cover; aspect-ratio: 1/1;">
+                <label for="photoUpload" class="position-absolute bottom-0 end-0 bg-teal text-white rounded-circle p-1 shadow-sm" style="cursor: pointer; transform: translate(-15px, 0);">
+                    <i class="fa-solid fa-camera fa-xs"></i>
+                </label>
+            </div>
+            <div>
+                <h3 class="fw-bold mb-0 text-dark text-capitalize"><%= student.name %></h3>
+                <div class="d-flex gap-2 align-items-center mt-1">
+                    <span class="badge <%= student.status === 'Active' ? 'bg-success' : (student.status === 'Pending' ? 'bg-info' : 'bg-warning text-dark') %> rounded-pill px-3">
+                        Status: <%= student.status %>
+                    </span>
+                    <span class="small fw-bold <%= student.isVerified ? 'text-success' : 'text-danger' %>">
+                        <i class="fa-solid <%= student.isVerified ? 'fa-check-circle' : 'fa-circle-xmark' %>"></i> 
+                        <%= student.isVerified ? 'Verified' : 'Not Verified' %>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex flex-column gap-2 align-items-end">
+            <div class="d-flex gap-2">
+                <% if(student.status !== 'Pending') { %>
+                    <button type="button" class="btn btn-dark btn-sm fw-bold px-3 rounded-3" data-bs-toggle="modal" data-bs-target="#passwordModal">Change Password</button>
+                    <button type="button" class="btn btn-outline-success btn-sm fw-bold px-3 rounded-3" data-bs-toggle="modal" data-bs-target="#paymentModal">₹ Payment</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm fw-bold px-3 rounded-3" data-bs-toggle="modal" data-bs-target="#noticeModal">Notice</button>
+                <% } else { %>
+                    <div class="d-flex gap-2">
+                        <form action="/admin/students/<%= student._id %>/approve" method="POST">
+                            <button type="submit" class="btn btn-success fw-bold px-4 rounded-pill shadow-sm">
+                                <i class="fa-solid fa-user-check me-2"></i>Approve
+                            </button>
+                        </form>
+                        <form action="/admin/students/<%= student._id %>?_method=DELETE" method="POST" onsubmit="return confirm('क्या आप इस छात्र का आवेदन हमेशा के लिए हटाना चाहते हैं?')">
+                            <button type="submit" class="btn btn-danger fw-bold px-4 rounded-pill shadow-sm">
+                                <i class="fa-solid fa-trash-can me-2"></i>Delete
+                            </button>
+                        </form>
+                    </div>
+                <% } %>
+            </div>
+            
+            <% if(student.status !== 'Pending') { %>
+            <form action="/admin/students/<%= student._id %>/update-status" method="POST" class="d-flex gap-2 mt-1">
+                <select name="status" class="form-select form-select-sm shadow-sm" style="width: auto;" onchange="this.form.submit()">
+                    <% ['Approved', 'Active', 'Left', 'Blocked'].forEach(s => { %>
+                        <option value="<%= s %>" <%= student.status === s ? 'selected' : '' %>><%= s %></option>
+                    <% }) %>
+                </select>
+                <select name="isVerified" class="form-select form-select-sm shadow-sm" style="width: auto;" onchange="this.form.submit()">
+                    <option value="true" <%= student.isVerified ? 'selected' : '' %>>Verified</option>
+                    <option value="false" <%= !student.isVerified ? 'selected' : '' %>>Unverified</option>
+                </select>
+                <div class="input-group input-group-sm" style="width: auto;">
+                 <span class="input-group-text bg-teal text-white x-small fw-bold"><i class="fa-solid fa-book-reader me-1"></i> Library</span>
+                    <select name="isLibrary" class="form-select form-select-sm shadow-sm border-teal" onchange="this.form.submit()">
+                    <option value="true" <%= student.isLibrary ? 'selected' : '' %>>🟢 Active (Yes)</option>
+                    <option value="false" <%= !student.isLibrary ? 'selected' : '' %>>🔴 Inactive (No)</option>
+                     </select>
+                  </div>
+            </form>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-light">
+                <h6 class="fw-bold text-teal x-small text-uppercase mb-3">System Records</h6>
+                <% if(student.status !== 'Pending') { %>
+                    <div class="mb-3">
+                        <label class="x-small text-muted d-block">SKH ID</label>
+                        <div class="p-2 bg-white border rounded small fw-bold text-dark"><%= student.username %></div>
+                    </div>
+                <% } %>
+                <div class="mb-3">
+                    <label class="x-small text-muted d-block">Aadhar Number</label>
+                    <div class="p-2 bg-white border rounded small fw-bold text-dark"><%= student.Aadhar %></div>
+                </div>
+                <div class="mb-0">
+                    <label class="x-small text-muted d-block">Policy Status</label>
+                    <div class="p-2 bg-white border rounded small fw-bold <%= student.acceptpolicy ? 'text-success' : 'text-danger' %>">
+                        <i class="fa-solid <%= student.acceptpolicy ? 'fa-file-signature' : 'fa-file-circle-exclamation' %> me-1"></i>
+                        <%= student.acceptpolicy ? 'Accepted' : 'Pending' %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-3 overflow-hidden">
+                <h6 class="fw-bold text-teal x-small text-uppercase mb-3">Stay History</h6>
+                <div class="history-timeline small">
+                    <% if(student.status !== 'Pending' && student.stayHistory && student.stayHistory.length > 0) { %>
+                        <% student.stayHistory.forEach(h => { %>
+                            <div class="ps-3 mb-3 border-start border-2 border-teal position-relative">
+                                <div class="fw-bold text-dark"><%= h.session %></div>
+                                <div class="x-small text-muted">Room: <span class="badge bg-light text-dark"><%= h.roomNo %></span></div>
+                                <div class="x-small text-muted mt-1"><%= h.joinDate ? h.joinDate.toDateString() : '' %></div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="text-center py-3">
+                            <i class="fa-solid fa-clock-rotate-left text-muted opacity-50 mb-2 fs-4"></i>
+                            <p class="x-small text-muted mb-0">No history available.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-0 p-0">
+                    <ul class="nav nav-tabs nav-fill border-0 border-bottom" id="profileTabs">
+                        <li class="nav-item">
+                            <button class="nav-link active py-3 fw-bold border-0" data-bs-toggle="tab" data-bs-target="#edit">Profile Edit</button>
+                        </li>
+                        <% if(student.status !== 'Pending') { %>
+                            <li class="nav-item">
+                                <button class="nav-link py-3 fw-bold border-0 text-success" data-bs-toggle="tab" data-bs-target="#payTab">Payments</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link py-3 fw-bold border-0 text-danger" data-bs-toggle="tab" data-bs-target="#compTab">Complaints</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link py-3 fw-bold border-0 text-info" data-bs-toggle="tab" data-bs-target="#noticesTab">Notices Sent</button>
+                            </li>
+                        <% } %>
+                    </ul>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="edit">
+                            <form action="/admin/students/<%= student._id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+                                <input type="file" name="photo" id="photoUpload" class="d-none" accept="image/*">
+                                <div class="row g-3">
+                                    <h6 class="fw-bold text-muted border-bottom pb-1">Personal Details</h6>
+                                    <div class="col-md-6"><label class="small fw-bold">Student Name</label><input type="text" name="name" class="form-control" value="<%= student.name %>"></div>
+                                    <div class="col-md-6"><label class="small fw-bold">Father's Name</label><input type="text" name="Father_Name" class="form-control" value="<%= student.Father_Name %>"></div>
+                                    <div class="col-md-4"><label class="small fw-bold">Email Address</label><input type="email" name="Email" class="form-control" value="<%= student.Email %>"></div>
+                                    <div class="col-md-4"><label class="small fw-bold">DOB</label><input type="date" name="DOB" class="form-control" value="<%= student.DOB ? student.DOB.toISOString().split('T')[0] : '' %>"></div>
+                                    <div class="col-md-4">
+                                        <label class="small fw-bold">Blood Group</label>
+                                        <select name="Blood" class="form-select">
+                                            <% ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].forEach(bg => { %>
+                                                <option value="<%= bg %>" <%= student.Blood === bg ? 'selected' : '' %>><%= bg %></option>
+                                            <% }) %>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4"><label class="small fw-bold">Weight</label><input type="text" name="weight" class="form-control" value="<%= student.weight %>"></div>
+                                    <div class="col-md-4"><label class="small fw-bold">Goatr (Gotra)</label><input type="text" name="goatr" class="form-control" value="<%= student.goatr %>"></div>
+                                    <div class="col-md-4"><label class="small fw-bold">Phone (Student)</label><input type="number" name="Phone_student" class="form-control" value="<%= student.Phone_student %>"></div>
+
+                                    <h6 class="fw-bold text-muted border-bottom pb-1 mt-3">Education & Institute</h6>
+                                    <div class="col-md-4"><label class="small fw-bold">Qualification</label><input type="text" name="Qualification" class="form-control" value="<%= student.Qualification %>"></div>
+                                    <div class="col-md-4"><label class="small fw-bold">Last Institute</label><input type="text" name="last_institute" class="form-control" value="<%= student.last_institute %>"></div>
+                                    <div class="col-md-4"><label class="small fw-bold">Current Institute</label><input type="text" name="Current_institute" class="form-control" value="<%= student.Current_institute %>"></div>
+
+                                    <h6 class="fw-bold text-muted border-bottom pb-1 mt-3">Address & Administration</h6>
+                                    <div class="col-md-8"><label class="small fw-bold">Full Address</label><input type="text" name="Address" class="form-control" value="<%= student.Address %>"></div>
+                                    <div class="col-md-4"><label class="small fw-bold">Pincode</label><input type="number" name="Pincode" class="form-control" value="<%= student.Pincode %>"></div>
+                                    <div class="col-md-3"><label class="small fw-bold">T-Shirt Size</label><input type="text" name="t_shirt" class="form-control" value="<%= student.t_shirt %>"></div>
+
+                                    <div class="col-12 mt-2">
+                                        <label class="small fw-bold text-danger">Warden Remarks / Internal Description</label>
+                                        <textarea name="description" class="form-control bg-light" rows="3"><%= student.description %></textarea>
+                                    </div>
+                                    <div class="col-12 text-end mt-3">
+                                        <button type="submit" class="btn btn-teal px-5 py-2 rounded-pill shadow-sm fw-bold">Update Profile Information</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="payTab">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="bg-light">
+                                        <tr class="small">
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Month</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th class="text-center">Action</th> </tr>
+                                    </thead>
+                                    <tbody class="small">
+                                        <% if(payments && payments.length > 0) { %>
+                                            <% payments.forEach(p => { %>
+                                                <tr>
+                                                    <td><%= p.date.toLocaleDateString() %></td>
+                                                    <td class="fw-bold"><%= p.type %></td>
+                                                    <td><%= p.month %></td>
+                                                    <td class="fw-bold text-dark">₹<%= p.amount %></td>
+                                                    <td><span class="badge <%= p.status === 'Paid' ? 'bg-success' : 'bg-danger' %>"><%= p.status %></span></td>
+                                                    <td class="text-center">
+                                                        <form action="/admin/payments/<%= p._id %>?_method=DELETE" method="POST" onsubmit="return confirm('क्या आप वाकई इस भुगतान रिकॉर्ड को हटाना चाहते हैं?')">
+                                                            <button type="submit" class="btn btn-link link-danger p-0 border-0" title="Delete Record">
+                                                                <i class="fa-solid fa-trash-can"></i>
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <tr><td colspan="6" class="text-center py-4">No records.</td></tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="compTab">
+                            <% if(complaints && complaints.length > 0) { %>
+                                <% complaints.forEach(c => { %>
+                                    <div class="card border-0 bg-light p-3 mb-3 border-start border-4 <%= c.status === 'Solved' ? 'border-success' : 'border-warning' %>">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <h6 class="fw-bold mb-0 text-dark"><%= c.title %></h6>
+                                            <span class="badge bg-white text-dark shadow-sm"><%= c.status %></span>
+                                        </div>
+                                        <p class="small mb-2"><%= c.description %></p>
+                                        <form action="/admin/complaints/<%= c._id %>/resolve" method="POST" class="row g-2 pt-2 border-top">
+                                            <div class="col-8">
+                                                <input type="text" name="wardenReply" class="form-control form-control-sm" placeholder="Action/Reply..." value="<%= c.wardenReply %>">
+                                            </div>
+                                            <div class="col-4">
+                                                <button class="btn btn-teal btn-sm w-100">Solve</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                <% }) %>
+                            <% } else { %>
+                                <div class="text-center py-4 text-muted">No complaints found.</div>
+                            <% } %>
+                        </div>
+
+                        <div class="tab-pane fade" id="noticesTab">
+                            <% if(notices && notices.length > 0) { %>
+                                <% notices.forEach(n => { %>
+                                    <div class="card border-0 bg-light p-3 mb-2 border-start border-4 border-info">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="fw-bold mb-1"><%= n.title %></h6>
+                                            <small><%= n.date.toLocaleDateString() %></small>
+                                        </div>
+                                        <p class="small mb-0"><%= n.description %></p>
+                                    </div>
+                                <% }) %>
+                            <% } else { %>
+                                <div class="text-center py-4 text-muted">No notices sent yet.</div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="passwordModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="/admin/students/<%= student._id %>/change-password" method="POST" class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold">Change Student Password</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="password" name="newPassword" class="form-control" placeholder="New Password" required minlength="6">
+            </div>
+            <div class="modal-footer border-0"><button type="submit" class="btn btn-dark w-100 py-2 fw-bold">Update Password</button></div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="/admin/students/<%= student._id %>/payments" method="POST" class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold">New Payment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="small fw-bold">Select Type</label>
+                    <select name="type" class="form-select border-success" required>
+                        <option value="भोजन शुल्क (Mess Fee)">भोजन शुल्क (Mess Fee)</option>
+                        <option value="भवन रख-रखाव (Building Maintenance)">भवन रख-रखाव (Building Maintenance)</option>
+                        <option value="विलंब शुल्क (Late Fee/Fine)">विलंब शुल्क (Late Fee/Fine)</option>
+                        <option value="पुस्तकालय शुल्क (Library Fee)">पुस्तकालय शुल्क (Library Fee)</option>
+                        <option value="कॉशन मनी (Caution Money)">कॉशन मनी (Caution Money)</option>
+                        <option value="नया प्रवेश शुल्क (New Admission Fee)">नया प्रवेश शुल्क (New Admission Fee)</option>
+                        <option value="अग्रिम भोजन शुल्क (Advance Mess Fee)">अग्रिम भोजन शुल्क (Advance Mess Fee)</option>
+                        <option value="अनुशासन दंड (Disciplinary Fine)">अनुशासन दंड (Disciplinary Fine)</option>
+                        <option value="अन्य (Other)">अन्य (Other)</option>
+                    </select>
+                </div>
+                <div class="row g-2">
+                    <div class="col-6"><label class="small fw-bold text-success">Amount</label><input type="number" name="amount" class="form-control border-success" required></div>
+                    <div class="col-6"><label class="small fw-bold">Month</label><input type="month" name="month" class="form-control" required></div>
+                </div>
+            </div>
+            <div class="modal-footer border-0"><button type="submit" class="btn btn-success w-100 py-2 fw-bold">Save Payment</button></div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="noticeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="/admin/students/<%= student._id %>/notice" method="POST" class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold">Send Personal Notice</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3"><label class="small fw-bold">Title</label><input type="text" name="title" class="form-control" required></div>
+                <div class="mb-3"><label class="small fw-bold">Description</label><textarea name="description" class="form-control" rows="3" required></textarea></div>
+            </div>
+            <div class="modal-footer border-0"><button type="submit" class="btn btn-danger w-100 py-2 fw-bold">Send Notice</button></div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .bg-teal { background-color: #007A83; }
+    .text-teal { color: #007A83; }
+    .btn-teal { background-color: #007A83; color: white; border: none; }
+    .btn-teal:hover { background-color: #005a61; }
+    .nav-tabs .nav-link.active { border-bottom: 3px solid #007A83 !important; color: #007A83 !important; }
+    .x-small { font-size: 0.72rem; }
+    .history-timeline .border-start::before { content: ''; position: absolute; left: -6px; top: 0; width: 10px; height: 10px; background: #007A83; border-radius: 50%; }
+</style>
+
+<script>
+    document.getElementById('photoUpload').onchange = function() {
+        if(confirm("Do you want to change the profile photo?")) { this.form.submit(); }
+    };
+</script>
+
+<style>
+    .print-section {
+        display: none;
+    }
+
+    @media print {
+        @page {
+            size: A4 portrait;
+            margin: 6mm 8mm; /* Margins thode kam kiye taaki width aur badd sake */
+        }
+
+        html,
+        body {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #fff !important;
+            overflow: hidden;
+            font-size: 12px;
+        }
+
+        body * {
+            visibility: hidden;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .print-active,
+        .print-active * {
+            visibility: visible;
+        }
+
+        /* 🔥 Width ko 194mm se badha kar 198mm kiya taaki side gaps bilkul khatam ho jayein */
+        .print-active {
+            display: block !important;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 200mm !important; 
+            min-height: 282mm;
+            padding: 2mm !important;
+            margin: 0 !important;
+            box-sizing: border-box;
+            background: #fff !important;
+            overflow: hidden;
+        }
+
+        .print-blue-banner {
+            background-color: #0d6efd !important;
+            color: #ffffff !important;
+        }
+
+        .print-table-header {
+            background-color: #bee5eb !important;
+            color: #000 !important;
+        }
+
+        .border-blue-custom {
+            border: 2px solid #0d6efd !important;
+        }
+
+        .border-dark-custom {
+            border: 1px solid #000 !important;
+        }
+
+        table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+        }
+
+        td,
+        th {
+            padding: 5px 4px !important; /* Spacing thodi aur padding increase ki */
+            font-size: 11.5px !important;
+            vertical-align: middle !important;
+        }
+
+        h1 {
+            font-size: 26px !important;
+        }
+
+        h5 {
+            font-size: 13px !important;
+        }
+
+        h6 {
+            font-size: 12px !important;
+        }
+
+        p {
+            font-size: 11.5px !important;
+            line-height: 1.45 !important;
+            margin-bottom: 4px !important;
+        }
+
+        .form-row-custom {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            width: 100%;
+            margin-bottom: 7px;
+            flex-wrap: wrap;
+        }
+
+        .form-label-inline {
+            font-weight: bold;
+            white-space: nowrap;
+            font-size: 11.5px;
+        }
+
+        .form-value-inline {
+            flex: 1;
+            border-bottom: 1px dashed #000;
+            padding-left: 4px;
+            min-width: 60px;
+            font-size: 11.5px;
+        }
+
+        .table {
+            margin-bottom: 10px !important;
+        }
+
+        img {
+            max-width: 100%;
+        }
+    }
+
+    .form-row-custom {
+        display: flex;
+        align-items: flex-end;
+        width: 100%;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+
+    .form-label-inline {
+        font-weight: bold;
+        white-space: nowrap;
+        color: #000;
+        font-size: 12px;
+    }
+
+    .form-value-inline {
+        flex-grow: 1;
+        border-bottom: 1px dashed #000;
+        padding-left: 6px;
+        font-weight: bold;
+        color: #111;
+        min-width: 70px;
+    }
+</style>
+
+<div id="printableAdmissionForm"
+    class="print-section text-dark"
+    style="font-family:'Noto Sans Devanagari', Arial, sans-serif; width:198mm; min-height:282mm; margin:0; font-size:13px;">
+
+    <div class="w-100 mb-3 overflow-hidden rounded-1">
+        <img src="https://res.cloudinary.com/dqpxo2u3i/image/upload/v1778997485/WhatsApp_Image_2026-05-17_at_11.25.32_AM_iimlee.jpg" 
+             alt="सीरवी किसान छात्रावास" 
+             style="width: 100%; height: auto; display: block; object-fit: fill;">
+    </div>
+
+    <div class="row g-2 mb-3 align-items-stretch w-100 m-0">
+        <div class="col-9 ps-0">
+            <div class="border border-dark border-1 bg-white rounded-1 overflow-hidden" style="border-color: #000 !important; min-height: 133px; display: flex; flex-column; justify-content: space-between; flex-direction: column;">
+                
+                <div class="d-flex flex-grow-1" style="border-bottom: 1px solid #000; border-color: #000 !important;">
+                    <div class="p-2 border-end flex-grow-1" style="width: 50%; border-color: #000 !important;">
+                        <h6 class="fw-bold text-primary mb-2" style="font-size: 13px;">कार्यालय उपयोग हेतु</h6>
+                        <div class="mb-1" style="font-size: 11.5px;">
+                            आवेदन प्राप्ति संख्या: <span class="fw-bold text-dark ps-1" style="font-size: 13px;"><%= student.username %></span>
+                        </div>
+                        <div class="mt-2" style="font-size: 11.5px;">रसीद संख्या .......................................</div>
+                    </div>
+                    
+                    <div class="p-2 flex-grow-1 text-center d-flex flex-column justify-content-center" style="width: 50%;">
+                        <h5 class="fw-bold text-primary mb-1" style="font-size: 14px;">प्रवेश फार्म</h5>
+                        <% 
+                            let currentSession = "2026-2027"; 
+                            if(student.stayHistory && student.stayHistory.length > 0) {
+                                currentSession = student.stayHistory[student.stayHistory.length - 1]?.session || currentSession;
+                            }
+                        %>
+                        <div class="fw-bold text-dark" style="font-size: 13px;">
+                            सत्र: <span class="ps-1 fw-bold text-dark" style="font-size: 13px;"><%= currentSession %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-100 d-flex justify-content-center bg-light">
+                    <table class="table m-0 text-center align-middle border-0" style="font-size: 10.5px; width: 100% !important;">
+                        <tr class="fw-bold text-dark">
+                            <td width="10%" class="border-end border-dark" style="border-color: #000 !important; background: #f8f9fa;">कमरा नं.</td>
+                            <td width="10%" class="border-end border-dark bg-white" style="border-color: #000 !important;"><%= student.room || '' %></td>
+                            
+                            <td width="10%" class="border-end border-dark" style="border-color: #000 !important; background: #f8f9fa;">बेड नं.</td>
+                            <td width="10%" class="border-end border-dark bg-white" style="border-color: #000 !important;"></td>
+                            
+                            <td width="10%" class="border-end border-dark" style="border-color: #000 !important; background: #f8f9fa;">टेबल नं.</td>
+                            <td width="10%" class="border-end border-dark bg-white" style="border-color: #000 !important;"></td>
+                            
+                            <td width="10%" class="border-end border-dark" style="border-color: #000 !important; background: #f8f9fa;">कैम्पर नं.</td>
+                            <td width="10%" class="border-end border-dark bg-white" style="border-color: #000 !important;"></td>
+                            
+                            <td width="12%" class="border-end border-dark" style="border-color: #000 !important; background: #f8f9fa;">टी-शर्ट साईज</td>
+                            <td width="8%" class="bg-white"><%= student.t_shirt || '' %></td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-3 pe-0 text-end">
+            <div class="border border-dark-custom d-flex flex-column align-items-center justify-content-center bg-light ms-auto rounded" style="width:115px; height:133px;">
+                <% if(student.photo) { %>
+                    <img src="<%= student.photo %>" style="width:100%; height:100%; object-fit:cover; border-radius: 3px;">
+                <% } else { %>
+                    <div class="text-center text-muted p-2" style="font-size:10px; line-height:1.2;">विद्यार्थी का नवीनतम रंगीन फोटो</div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-100 mb-2 px-1 mt-2">
+        <div class="form-row-custom">
+            <span class="form-label-inline">विद्यार्थी का नाम:</span>
+            <span class="form-value-inline text-uppercase"><%= student.name %></span>
+            <span class="form-label-inline ms-2">पिता का नाम:</span>
+            <span class="form-value-inline text-uppercase"><%= student.Father_Name %></span>
+        </div>
+
+        <div class="form-row-custom">
+            <span class="form-label-inline">गोत्र:</span>
+            <span class="form-value-inline"><%= student.goatr || '................' %></span>
+            <span class="form-label-inline ms-2">जन्मतिथि:</span>
+            <span class="form-value-inline"><%= student.DOB ? student.DOB.toLocaleDateString('hi-IN') : '................' %></span>
+            <span class="form-label-inline ms-2">वजन:</span>
+            <span class="form-value-inline"><%= student.weight ? student.weight + ' किग्रा.' : '................' %></span>
+            <span class="form-label-inline ms-2">ब्लड ग्रुप:</span>
+            <span class="form-value-inline"><%= student.Blood || '................' %></span>
+        </div>
+
+        <div class="form-row-custom">
+            <span class="form-label-inline">मोबाईल ( छात्र ):</span>
+            <span class="form-value-inline"><%= student.Phone_student %></span>
+            <span class="form-label-inline ms-2">( पिता ):</span>
+            <span class="form-value-inline"><%= student.Phone_father || '................' %></span>
+        </div>
+
+        <div class="form-row-custom">
+            <span class="form-label-inline">स्थायी पता:</span>
+            <span class="form-value-inline"><%= student.Address %></span>
+            <span class="form-label-inline ms-2">पिनकोड:</span>
+            <span class="form-value-inline" style="max-width:120px;"><%= student.Pincode %></span>
+        </div>
+
+        <div class="form-row-custom">
+            <span class="form-label-inline">शैक्षणिक योग्यता:</span>
+            <span class="form-value-inline"><%= student.Qualification %></span>
+        </div>
+
+        <div class="form-row-custom">
+            <span class="form-label-inline">अन्तिम शिक्षण संस्थान का नाम:</span>
+            <span class="form-value-inline"><%= student.last_institute %></span>
+        </div>
+
+        <div class="form-row-custom">
+            <span class="form-label-inline">वर्तमान शिक्षण संस्थान:</span>
+            <span class="form-value-inline"><%= student.Current_institute %></span>
+        </div>
+    </div>
+
+    <table class="table table-sm table-bordered border-dark text-center align-middle mb-3 mt-2 w-100">
+        <thead>
+            <tr class="print-table-header fw-bold">
+                <th width="20%">कक्षा</th>
+                <th width="15%">प्राप्तांक</th>
+                <th width="15%">पूर्णांक</th>
+                <th width="15%">प्रतिशत</th>
+                <th width="15%">श्रेणी</th>
+                <th>विशेष</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="height:28px;">
+                <td>...................</td>
+                <td>...........</td>
+                <td>...........</td>
+                <td>.............</td>
+                <td>...........</td>
+                <td>................................</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="p-2 mb-2 bg-white" style="line-height:1.4; font-size:11.5px; text-align:justify; width: 100%;">
+        <h6 class="fw-bold text-decoration-underline text-primary mb-1">
+            विद्यार्थी द्वारा प्रतिज्ञा एवं घोषणा
+        </h6>
+        <p class="mb-0 text-dark">
+            मैं (विद्यार्थी का नाम) <span class="fw-bold text-uppercase border-bottom border-dark px-1"><%= student.name %></span> प्रतिज्ञा एवं घोषणा करता हूँ कि मैं छात्रावास में रहकर विवरणिका में दिये गये नियमों उपनियमों का पूरी तरह से पालन करूँगा। छात्रावास के समस्त नियम मुझे स्वीकार है। यदि मुझसे कोई गलत कार्य होता है तो मुझे बिना सूचित किये छात्रावास से निष्कासित कर दिया जावे तथा यदि मेरे द्वारा इस वर्ष की कक्षा में 75 प्रतिशत अंक अर्जित नहीं करता हूँ तो अगले सत्र में छात्रावास में प्रवेश लेने का हकदार नहीं रहूँगा, अतः मुझे अगली कक्षा के लिए छात्रावास में प्रवेश नहीं दिया जावे। और छात्रावास में किसी प्रकार की होने वाली जान व माल की घटना के लिए मैं स्वयं जिम्मेदार रहूँगा।
+        </p>
+        <div class="text-end mt-1 pe-2 fw-bold" style="font-size:11px;">
+            हस्ताक्षर विद्यार्थी
+        </div>
+    </div>
+
+    <hr class="my-2 border-primary w-100" style="opacity: 0.7; border-width: 1px;">
+
+    <div class="p-2 bg-white" style="line-height:1.4; font-size:11.5px; text-align:justify; width: 100%;">
+        <h6 class="fw-bold text-decoration-underline text-primary mb-1">
+            विद्यार्थी के पिता द्वारा / संरक्षक द्वारा शपथ पत्र
+        </h6>
+        <p class="mb-0 text-dark">
+            मैं (पिता का नाम) <span class="fw-bold text-uppercase border-bottom border-dark px-1"><%= student.Father_Name %></span> शपथ पूर्वक बयान करता हूँ कि मेरा पुत्र <span class="fw-bold text-uppercase border-bottom border-dark px-1"><%= student.name %></span> निवासी <span class="fw-bold border-bottom border-dark px-1"><%= student.Address %></span> छात्रावास में रहकर छात्रावास के समस्त नियमों का पालन करेगा तथा इस वर्ष इस कक्षा कम से कम 75 प्रतिशत अंक अर्जित करेगा। यदि ऐसी नहीं कर पाता है तो अगले वर्ष छात्रावास में प्रवेश के लिए अयोग्य माना जावेगा। मैं प्रमाणित करता हूँ कि उपरोक्त विवरण सही है। मैं विद्यार्थी के आचरण तथा द्रव्य सम्बन्धि दायित्वों के लिए उत्तरदायी हूँ। छात्रावास में रहकर किसी प्रकार की क्षति या जान-माल की हानि होने पर छात्रावास प्रबंधन जिम्मेदार नहीं रहेगा। बल्कि मैं और मेरा पुत्र जिम्मेदार होंगे।
+        </p>
+
+        <div class="d-flex justify-content-between align-items-end mt-4 pt-2 w-100">
+            
+            <div style="font-size:11px; line-height:1.4;">
+                <div class="border border-dark p-3 fw-bold text-center bg-light rounded shadow-sm" style="width:340px; font-size:11px; line-height: 1.4;">
+                    उपरोक्त लिखित जानकारी एवं योग्यता के आधार पर छात्र को स्थायी या अस्थायी प्रवेश दिया जाता है।
+                    <div class="fw-bold mt-4 pt-2 border-top border-secondary text-primary text-center">
+                        हस्ताक्षर अध्यक्ष / सचिव / व्यवस्थापक
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center fw-bold d-flex flex-column align-items-center" style="line-height:1.4; font-size:11px; min-width: 180px;">
+                <div class="mb-5">
+                    हस्ताक्षर एवं अंगूठा निशान<br>
+                    संरक्षक / पिता
+                </div>
+                <div class="text-muted mt-3 font-monospace fw-normal" style="font-size:11px; align-self: flex-start;">
+                    दिनांक: ...................
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function printAdmissionForm() {
+        document.getElementById("printableAdmissionForm").classList.add("print-active");
+        window.print();
+    }
+</script>

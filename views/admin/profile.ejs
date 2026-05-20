@@ -1,0 +1,221 @@
+<% layout('/layout/admin-lyout.ejs') -%>
+
+<div class="container-fluid">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm text-center p-4">
+                <div class="position-relative d-inline-block mx-auto mb-3">
+                    <img src="<%= warden.photo %>" alt="Profile" class="rounded-circle img-thumbnail shadow-sm" style="width: 160px; height: 160px; object-fit: cover;">
+                    <div class="status-indicator"></div>
+                </div>
+                <h4 class="fw-bold mb-0"><%= warden.name %></h4>
+                <p class="text-teal fw-semibold mb-3">Hostel Warden</p>
+                <div class="warden-id-badge mb-3">
+                    <small class="text-muted d-block">Official ID</small>
+                    <span class="fw-bold text-uppercase"><%= warden.username %></span>
+                </div>
+                <hr class="my-4">
+                <div class="text-start">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Status:</span>
+                        <span class="badge bg-success-soft text-success">Active</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">Verified:</span>
+                        <span class="text-primary small fw-bold"><%= warden.isVerified ? 'Verified' : 'Pending' %></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm p-4 mb-4">
+                <h5 class="fw-bold mb-4 border-bottom pb-3">
+                    <i class="fa-solid fa-user-gear me-2 text-teal"></i>Account Details
+                </h5>
+                
+                <form action="/admin" method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">Warden ID (Unique)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted"></i></span>
+                                <input type="text" class="form-control bg-light" value="<%= warden.username %>" disabled>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">Joining Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fa-solid fa-calendar-check text-muted"></i></span>
+                                <input type="text" class="form-control bg-light" value="<%= new Date(warden.joiningDate).toLocaleDateString('en-GB', {day:'2-digit', month:'long', year:'numeric'}) %>" disabled>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Full Name</label>
+                            <input type="text" name="profile[name]" class="form-control" value="<%= warden.name %>" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Phone Number</label>
+                            <input type="text" name="profile[phone]" class="form-control" value="<%= warden.phone %>" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold small">Email Address</label>
+                            <input type="email" name="profile[email]" class="form-control" value="<%= warden.email %>" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold small">Bio / Description</label>
+                            <textarea name="profile[discription]" class="form-control" rows="3"><%= warden.discription %></textarea>
+                        </div>
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-teal px-4">Save Profile Changes</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+           <div class="card border-0 shadow-sm p-4">
+    <h5 class="fw-bold mb-4 text-danger border-bottom pb-3">
+        <i class="fa-solid fa-shield-halved me-2"></i>Security & Password
+    </h5>
+    
+    <div id="securityAlertBox" class="alert d-none small py-2 rounded-3 mb-3"></div>
+
+    <div id="passwordFormStep">
+        <form id="changePasswordEngineForm">
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label class="form-label small fw-bold">Current Password</label>
+                    <input type="password" name="oldPassword" class="form-control" placeholder="••••••••" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold">New Password</label>
+                    <input type="password" id="newPasswordInput" name="newPassword" class="form-control" required minlength="6">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold">Confirm Password</label>
+                    <input type="password" id="confirmPasswordInput" name="confirmPassword" class="form-control" required>
+                </div>
+                <div class="col-12 mt-3">
+                    <button type="submit" id="pwdSubmitBtn" class="btn btn-outline-danger btn-sm">
+                        Change My Password
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="otpVerificationStep" class="d-none">
+        <div class="bg-light p-3 rounded-3 border border-warning-subtle mb-3">
+            <h6 class="fw-bold text-dark mb-1"><i class="fa-solid fa-envelope-circle-check text-warning me-1"></i> Verify Your Identity</h6>
+            <p class="text-muted small mb-0">An OTP has been dispatched to your registered email address. Enter it below to save changes.</p>
+        </div>
+        <form id="verifyOtpEngineForm">
+            <input type="hidden" id="cachedNewPassword" name="pendingPassword">
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label class="form-label small fw-bold text-danger">Enter 6-Digit OTP</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="fa-solid fa-key text-muted"></i></span>
+                        <input type="text" name="otpInput" class="form-control font-monospace fw-bold tracking-widest text-center" placeholder="000000" maxlength="6" pattern="\d{6}" required>
+                    </div>
+                </div>
+                <div class="col-12 mt-3 d-flex gap-2">
+                    <button type="submit" id="otpSubmitBtn" class="btn btn-dark btn-sm fw-bold px-4">Verify & Update</button>
+                    <button type="button" onclick="window.location.reload()" class="btn btn-light btn-sm border text-muted">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById("changePasswordEngineForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        
+        const alertBox = document.getElementById("securityAlertBox");
+        const newPwd = document.getElementById("newPasswordInput").value;
+        const confPwd = document.getElementById("confirmPasswordInput").value;
+        const submitBtn = document.getElementById("pwdSubmitBtn");
+
+        if (newPwd !== confPwd) {
+            alertBox.className = "alert alert-danger small py-2 rounded-3";
+            alertBox.innerHTML = "New password and confirm password do not match!";
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = "Processing Engine...";
+
+        try {
+            const formData = new FormData(this);
+            const searchParams = new URLSearchParams(formData);
+
+            const response = await fetch("/admin/profile/password-request", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: searchParams
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alertBox.className = "alert alert-warning small py-2 rounded-3";
+                alertBox.innerHTML = data.message;
+                
+                document.getElementById("cachedNewPassword").value = newPwd;
+                document.getElementById("passwordFormStep").classList.add("d-none");
+                document.getElementById("otpVerificationStep").classList.remove("d-none");
+            } else {
+                alertBox.className = "alert alert-danger small py-2 rounded-3";
+                alertBox.innerHTML = data.message;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = "Change My Password";
+            }
+        } catch (err) {
+            alertBox.className = "alert alert-danger small py-2 rounded-3";
+            alertBox.innerHTML = "Network connection failed. Try again.";
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = "Change My Password";
+        }
+    });
+
+    document.getElementById("verifyOtpEngineForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        
+        const alertBox = document.getElementById("securityAlertBox");
+        const otpBtn = document.getElementById("otpSubmitBtn");
+
+        otpBtn.disabled = true;
+        otpBtn.innerHTML = "Verifying...";
+
+        try {
+            const formData = new FormData(this);
+            const searchParams = new URLSearchParams(formData);
+
+            const response = await fetch("/admin/profile/password-verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: searchParams
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alertBox.className = "alert alert-success small py-2 rounded-3";
+                alertBox.innerHTML = data.message;
+                setTimeout(() => { window.location.reload(); }, 2000);
+            } else {
+                alertBox.className = "alert alert-danger small py-2 rounded-3";
+                alertBox.innerHTML = data.message;
+                otpBtn.disabled = false;
+                otpBtn.innerHTML = "Verify & Update";
+            }
+        } catch (err) {
+            alertBox.className = "alert alert-danger small py-2 rounded-3";
+            alertBox.innerHTML = "Verification system timeout.";
+            otpBtn.disabled = false;
+            otpBtn.innerHTML = "Verify & Update";
+        }
+    });
+</script>

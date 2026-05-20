@@ -1,0 +1,325 @@
+<% layout('/layout/admin-lyout.ejs') -%>
+
+<style>
+    :root {
+        --skh-primary: #007A83;
+        --skh-primary-light: #e6f5f6;
+        --skh-dark: #1e293b;
+        --skh-slate-600: #475569;
+        --skh-slate-400: #94a3b8;
+        --skh-border: #e2e8f0;
+        --skh-bg: #f8fafc;
+        --skh-white: #ffffff;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.06);
+    }
+
+    body {
+        background-color: var(--skh-bg);
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* Main Container Restraints */
+    .dev-console-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem;
+    }
+
+    /* Section Heading Styles */
+    .section-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--skh-slate-400);
+        font-weight: 700;
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 3px;
+        background-color: var(--skh-primary);
+        border-radius: 2px;
+    }
+
+    /* Lead Architect / Hero Card Design */
+    .lead-card {
+        background: var(--skh-white);
+        border: 1px solid var(--skh-border);
+        border-radius: 24px;
+        box-shadow: var(--shadow-lg);
+        padding: 3rem 2rem;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .lead-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 8px;
+        background: linear-gradient(90deg, #005a61, var(--skh-primary), #2dd4bf);
+    }
+
+    .lead-avatar-wrapper {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto 1.5rem auto;
+    }
+
+    .lead-avatar {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid var(--skh-white);
+        box-shadow: 0 0 0 4px var(--skh-primary-light), var(--shadow-md);
+    }
+
+    .lead-name {
+        color: var(--skh-dark);
+        font-weight: 800;
+        font-size: 1.85rem;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.25rem;
+    }
+
+    .lead-badge {
+        background-color: var(--skh-primary-light);
+        color: var(--skh-primary);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0.35rem 1rem;
+        border-radius: 9999px;
+        display: inline-block;
+        margin-bottom: 1.25rem;
+    }
+
+    .lead-meta-text {
+        font-size: 0.95rem;
+        color: var(--skh-slate-600);
+        margin-bottom: 0.35rem;
+        font-weight: 500;
+    }
+
+    .lead-contact-grid {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 1.5rem 0;
+        flex-wrap: wrap;
+        border-top: 1px solid var(--skh-border);
+        border-bottom: 1px solid var(--skh-border);
+        padding: 1rem 0;
+    }
+
+    .contact-item {
+        font-size: 0.9rem;
+        color: var(--skh-dark);
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: color 0.2s ease;
+    }
+
+    .contact-item i {
+        color: var(--skh-primary);
+        font-size: 1.05rem;
+    }
+
+    .contact-item:hover {
+        color: var(--skh-primary);
+    }
+
+    /* Social Icon Links Base Structuring */
+    .social-dock {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .social-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background-color: var(--skh-bg);
+        border: 1px solid var(--skh-border);
+        color: var(--skh-slate-600);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        text-decoration: none;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .social-btn:hover {
+        background-color: var(--skh-primary);
+        color: var(--skh-white);
+        border-color: var(--skh-primary);
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0, 122, 131, 0.25);
+    }
+
+    /* Co-Developers Grid System (Locked Row Execution) */
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .team-card {
+        background: var(--skh-white);
+        border: 1px solid var(--skh-border);
+        border-radius: 18px;
+        padding: 2rem 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .team-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-color: #cbd5e1;
+    }
+
+    .team-avatar {
+        width: 85px;
+        height: 85px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 3px solid var(--skh-white);
+        box-shadow: 0 0 0 3px #f1f5f9, var(--shadow-sm);
+        margin-bottom: 1.25rem;
+    }
+
+    .team-name {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--skh-dark);
+        margin-bottom: 0.25rem;
+        letter-spacing: -0.01em;
+    }
+
+    .team-inst {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--skh-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+    }
+
+    /* Media Responsive Fallbacks */
+    @media (max-width: 992px) {
+        .team-grid {
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+    }
+</style>
+
+<div class="dev-console-container">
+    
+    <div class="text-center mb-5">
+        <p class="section-title mb-4">Project Founder & Lead Architect</p>
+        
+        <div class="lead-card mx-auto" style="max-width: 800px;">
+            <div class="lead-avatar-wrapper">
+                <img src="https://res.cloudinary.com/dqpxo2u3i/image/upload/v1779259381/2501EC25_jc67ns.jpg" alt="Mahendra Seervi" class="lead-avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
+            </div>
+            
+            <h2 class="lead-name">Mahendra Seervi</h2>
+            <span class="lead-badge">Lead Developer</span>
+            
+            <p class="lead-meta-text"><i class="fa-solid fa-graduation-cap me-1.5 text-muted"></i> B.Tech Student</p>
+            <p class="lead-meta-text"><i class="fa-solid fa-microchip me-1.5 text-muted"></i> Department of Electrical Engineering</p>
+            <p class="lead-meta-text"><i class="fa-solid fa-building-columns me-1.5 text-muted"></i> Indian Institute of Technology Patna (IIT Patna)</p>
+            
+            <div class="lead-contact-grid">
+                <a href="tel:+917023146362" class="contact-item">
+                    <i class="fa-solid fa-phone"></i> +91 7023146362
+                </a>
+                <a href="mailto:mahendra_2501ec25@iitp.ac.in" class="contact-item">
+                    <i class="fa-solid fa-envelope"></i> mahendra_2501ec25@iitp.ac.in
+                </a>
+            </div>
+            
+            <div class="social-dock">
+                <a href="https://www.linkedin.com/in/mahendraseervi628/" target="_blank" class="social-btn" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                <a href="https://github.com/Mahendra-seervi" target="_blank" class="social-btn" title="GitHub"><i class="fa-brands fa-github"></i></a>
+                <a href="https://www.instagram.com/mahendraseervi650/" target="_blank" class="social-btn" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5 pt-3">
+        <div class="text-center mb-4">
+            <p class="section-title">Co-Developers & Contributors</p>
+        </div>
+        
+        <div class="team-grid">
+            
+            <div class="team-card text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Keshva Jha" class="team-avatar">
+                    <h4 class="team-name">Keshva Jha</h4>
+                    <span class="team-inst">IIT Patna</span>
+                </div>
+                <div class="social-dock mt-2">
+                    <a href="https://linkedin.com" target="_blank" class="social-btn"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a href="https://github.com" target="_blank" class="social-btn"><i class="fa-brands fa-github"></i></a>
+                    <a href="https://instagram.com" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+            </div>
+
+            <div class="team-card text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Abhishek Raj Kumar" class="team-avatar">
+                    <h4 class="team-name">Abhishek Raj Kumar</h4>
+                    <span class="team-inst">IIT Patna</span>
+                </div>
+                <div class="social-dock mt-2">
+                    <a href="https://linkedin.com" target="_blank" class="social-btn"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a href="https://github.com" target="_blank" class="social-btn"><i class="fa-brands fa-github"></i></a>
+                    <a href="https://instagram.com" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+            </div>
+
+            <div class="team-card text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Pradeep Jinger" class="team-avatar">
+                    <h4 class="team-name">Pradeep Jinger</h4>
+                    <span class="team-inst">MNIT Jaipur</span>
+                </div>
+                <div class="social-dock mt-2">
+                    <a href="https://linkedin.com" target="_blank" class="social-btn"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a href="https://github.com" target="_blank" class="social-btn"><i class="fa-brands fa-github"></i></a>
+                    <a href="https://instagram.com" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>

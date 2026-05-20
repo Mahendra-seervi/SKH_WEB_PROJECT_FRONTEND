@@ -1,0 +1,298 @@
+<% layout('/layout/admin-lyout.ejs') -%>
+
+<style>
+    :root {
+        --skh-teal: #008080;
+        --skh-teal-dark: #005f5f;
+        --slate-900: #0f172a;
+        --slate-600: #475569;
+        --slate-100: #f1f5f9;
+        --border-light: #e2e8f0;
+    }
+
+    body {
+        background-color: #f8fafc;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    .glass-header {
+        background: #ffffff;
+        border-bottom: 1px solid var(--border-light);
+        padding: 20px 0;
+    }
+
+    /* Modern Pill Controls without "All" option */
+    .tab-nav-container {
+        display: flex;
+        gap: 12px;
+        border-bottom: 2px solid var(--border-light);
+        padding-bottom: 12px;
+    }
+
+    .modern-tab-btn {
+        background: transparent;
+        border: none;
+        color: var(--slate-600);
+        font-weight: 600;
+        font-size: 14px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .modern-tab-btn:hover {
+        color: var(--slate-900);
+        background: var(--slate-100);
+    }
+
+    .modern-tab-btn.active {
+        color: var(--skh-teal);
+        background: #f0fdfa;
+    }
+
+    .modern-tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: -14px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--skh-teal);
+        border-radius: 3px 3px 0 0;
+    }
+
+    /* Minimalist Ticket Design */
+    .ticket-card-ui {
+        background: #ffffff;
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        flex-column: justify;
+        height: 100%;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .ticket-card-ui:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .category-badge-micro {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .meta-grid-box {
+        background: #f8fafc;
+        border: 1px solid var(--border-light);
+        border-radius: 8px;
+        padding: 12px;
+    }
+
+    .meta-item-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12.5px;
+        padding-bottom: 6px;
+        margin-bottom: 6px;
+        border-bottom: 1px dashed var(--slate-100);
+    }
+
+    .meta-item-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+
+    .reply-stream-box {
+        background-color: #fafafa;
+        border-left: 2px solid var(--skh-teal);
+        font-size: 12px;
+        color: var(--slate-600);
+    }
+
+    .action-trigger-btn {
+        background: var(--slate-900);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        transition: background 0.2s;
+    }
+
+    .action-trigger-btn:hover {
+        background: var(--skh-teal);
+    }
+</style>
+
+<div class="glass-header shadow-sm">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h4 fw-bold text-dark m-0" style="letter-spacing: -0.3px;">SIRVI KISAN HOSTEL, PALI</h1>
+            <p class="text-muted small m-0">Resolution & Complaint Management Desk</p>
+        </div>
+        <div>
+            <span class="badge bg-dark-subtle text-dark-emphasis border px-2.5 py-1.5 rounded-2 font-monospace fs-8">v2.0.26</span>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <% if (messages && messages.success) { %>
+        <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4 small" role="alert">
+            <i class="fa-solid fa-circle-check me-1"></i> <%= messages.success %>
+        </div>
+    <% } %>
+
+    <div class="tab-nav-container mb-4">
+        <button onclick="switchUiFilter('Pending')" id="defaultTabTrigger" class="modern-tab-btn ui-filter-tab active">
+            Pending ⏳ <span class="badge bg-warning text-dark ms-1 rounded-pill"><%= complaints.filter(c => c.status === 'Pending').length %></span>
+        </button>
+        <button onclick="switchUiFilter('In Progress')" class="modern-tab-btn ui-filter-tab">
+            In Progress ⚙️ <span class="badge bg-info text-dark ms-1 rounded-pill"><%= complaints.filter(c => c.status === 'In Progress').length %></span>
+        </button>
+        <button onclick="switchUiFilter('Solved')" class="modern-tab-btn ui-filter-tab">
+            Resolved ✅ <span class="badge bg-success text-white ms-1 rounded-pill"><%= complaints.filter(c => c.status === 'Solved').length %></span>
+        </button>
+        <button onclick="switchUiFilter('Rejected')" class="modern-tab-btn ui-filter-tab text-danger">
+            Rejected ❌ <span class="badge bg-danger text-white ms-1 rounded-pill"><%= complaints.filter(c => c.status === 'Rejected').length %></span>
+        </button>
+    </div>
+
+    <div class="row g-4" id="uiGridEngineWrapper">
+        <% if(complaints.length === 0) { %>
+            <div class="col-12 text-center py-5 text-muted">
+                <i class="fa-solid fa-box-open fs-2 d-block mb-2 opacity-40"></i>
+                No complaint entries logged in system database.
+            </div>
+        <% } else { %>
+            <% complaints.forEach(complaint => { %>
+                <div class="col-md-6 col-lg-4 ui-complaint-wrapper-node" data-status="<%= complaint.status %>">
+                    <div class="ticket-card-ui d-flex flex-column shadow-sm">
+                        
+                        <div class="mb-2">
+                            <% 
+                                let microStyle = 'background: #f1f5f9; color: #475569;'; // Default
+                                if(complaint.category === 'Mess') microStyle = 'background: #fef3c7; color: #78350f;';
+                                if(complaint.category === 'Room') microStyle = 'background: #e0f2fe; color: #0369a1;';
+                                if(complaint.category === 'Electricity') microStyle = 'background: #fee2e2; color: #991b1b;';
+                                if(complaint.category === 'Water') microStyle = 'background: #e0f2fe; color: #1d4ed8;';
+                            %>
+                            <span class="category-badge-micro" style="<%= microStyle %>">
+                                <i class="fa-solid fa-circle small fs-9 opacity-70"></i> <%= complaint.category %>
+                            </span>
+                        </div>
+
+                        <h5 class="h6 fw-bold text-dark mb-1" style="line-height: 1.4;"><%= complaint.title %></h5>
+                        <p class="text-muted small flex-grow-1 mb-3" style="font-size: 13px;"><%= complaint.description %></p>
+
+                        <div class="meta-grid-box mb-3">
+                            <div class="meta-item-row">
+                                <span class="text-muted small">Student Name</span>
+                                <span class="fw-bold text-dark"><%= complaint.student ? complaint.student.name : 'N/A' %></span>
+                            </div>
+                            <div class="meta-item-row">
+                                <span class="text-muted small">Father Name</span>
+                                <span class="text-dark fw-medium"><%= complaint.student ? complaint.student.Father_Name : 'N/A' %></span>
+                            </div>
+                            <div class="meta-item-row">
+                                <span class="text-muted small">Username (SKH ID)</span>
+                                <span class="badge bg-light text-dark font-monospace border"><%= complaint.student && complaint.student.username ? complaint.student.username : 'PENDING' %></span>
+                            </div>
+                            <div class="meta-item-row">
+                                <span class="text-muted small">Room Assigned</span>
+                                <span class="badge bg-dark text-white px-2"><%= complaint.student && complaint.student.room ? complaint.student.room : 'N/A' %></span>
+                            </div>
+                        </div>
+
+                        <% if(complaint.wardenReply) { %>
+                            <div class="reply-stream-box p-2.5 rounded-end mb-3">
+                                <strong class="text-dark d-block mb-0.5" style="font-size: 11px;">Warden Remark:</strong>
+                                <span><%= complaint.wardenReply %></span>
+                            </div>
+                        <% } %>
+
+                        <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                            <span class="text-muted font-monospace" style="font-size: 11px;"><%= new Date(complaint.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) %></span>
+                            <button class="action-trigger-btn" data-bs-toggle="modal" data-bs-target="#mModal<%= complaint._id %>">Update Status</button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal fade" id="mModal<%= complaint._id %>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-sm">
+                        <div class="modal-content border-0 shadow-lg rounded-3">
+                            <form action="/admin/complaints/action/<%= complaint._id %>?_method=PUT" method="POST">
+                                <div class="modal-body p-3">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-secondary">Set Update Status:</label>
+                                        <select name="status" class="form-select form-select-sm" required>
+                                            <option value="Pending" <%= complaint.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                            <option value="In Progress" <%= complaint.status === 'In Progress' ? 'selected' : '' %>>In Progress</option>
+                                            <option value="Solved" <%= complaint.status === 'Solved' ? 'selected' : '' %>>Solved</option>
+                                            <option value="Rejected" <%= complaint.status === 'Rejected' ? 'selected' : '' %>>Rejected</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-secondary">Official Reply Note:</label>
+                                        <textarea name="wardenReply" class="form-control form-control-sm" rows="2" placeholder="Write steps..." required><%= complaint.wardenReply || '' %></textarea>
+                                    </div>
+                                    <div class="d-flex gap-1 justify-content-end">
+                                        <button type="button" class="btn btn-sm btn-light border py-1 px-3 small" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-sm btn-dark py-1 px-3 fw-bold small">Save Changes</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    function switchUiFilter(status) {
+        const items = document.getElementsByClassName('ui-complaint-wrapper-node');
+        const tabs = document.getElementsByClassName('ui-filter-tab');
+        
+        for (let i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove('active');
+        }
+        
+        if (window.event && window.event.currentTarget && window.event.currentTarget.classList) {
+            window.event.currentTarget.classList.add('active');
+        } else {
+            const defaultTab = document.getElementById('defaultTabTrigger');
+            if (defaultTab) {
+                defaultTab.classList.add('active');
+            }
+        }
+
+        for (let i = 0; i < items.length; i++) {
+            const itemStatus = items[i].getAttribute('data-status');
+            if (itemStatus === status) {
+                items[i].style.setProperty('display', 'block', 'important');
+            } else {
+                items[i].style.setProperty('display', 'none', 'important');
+            }
+        }
+    }
+
+    window.onload = function() {
+        switchUiFilter('Pending');
+    };
+</script>

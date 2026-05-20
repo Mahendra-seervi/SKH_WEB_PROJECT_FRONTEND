@@ -1,0 +1,240 @@
+<% layout('layout/admin-lyout') -%>
+
+<style>
+    .card { border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 12px; }
+    .table-responsive { white-space: nowrap; }
+    .btn-theme { background-color: #007A83; color: white; border: none; }
+    .btn-theme:hover { background-color: #005a61; color: white; }
+    .badge-all { background-color: #6c757d; }
+    .badge-active { background-color: #198754; }
+    .badge-left { background-color: #dc3545; }
+    .badge-single { background-color: #0dcaf0; color: #000; }
+    .text-wrap-custom {
+        max-width: 250px; 
+        white-space: normal; 
+        word-wrap: break-word;
+        font-size: 13px;
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h3 class="fw-bold mb-1 text-dark">📢 Student Notices Management</h3>
+            <p class="text-muted mb-0">छात्रों के डैशबोर्ड और ईमेल पर भेजे गए नोटिस का विवरण</p>
+        </div>
+        <div>
+            <button type="button" class="btn btn-theme px-4 py-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#sendNoticeModal">
+                <i class="fa-solid fa-paper-plane me-2"></i> नया नोटिस जारी करें
+            </button>
+        </div>
+    </div>
+
+    <div class="card p-3 mb-4 bg-white">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <span class="text-muted small fw-bold me-2"><i class="fa-solid fa-filter me-1"></i> फ़िल्टर करें:</span>
+            <a href="/admin/studentnotices" class="btn btn-sm btn-outline-secondary px-3 rounded-pill">All Dashboard Notices</a>
+            <a href="/admin/studentnotices?filter=All" class="btn btn-sm btn-outline-dark px-3 rounded-pill">Sent to All Hostel</a>
+            <a href="/admin/studentnotices?filter=Active" class="btn btn-sm btn-outline-success px-3 rounded-pill">Sent to Active Only</a>
+            <a href="/admin/studentnotices?filter=Left" class="btn btn-sm btn-outline-danger px-3 rounded-pill">Sent to Left Only</a>
+            <a href="/admin/studentnotices?filter=Single" class="btn btn-sm btn-outline-info px-3 rounded-pill">Sent to Particulars</a>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>दिनांक (Date)</th>
+                        <th>विषय (Subject)</th>
+                        <th>लक्षित समूह (Target Group)</th>
+                        <th>विशिष्ट छात्र (If Single)</th>
+                        <th>विवरण (Description)</th>
+                        <th class="text-center">कार्रवाई (Action)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(notices.length === 0) { %>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">कोई नोटिस रिकॉर्ड नहीं मिला।</td>
+                        </tr>
+                    <% } %>
+                    <% notices.forEach(n => { %>
+                        <tr>
+                            <td><%= n.createdAt.toLocaleDateString('hi-IN') %></td>
+                            
+                            <td class="fw-bold text-dark"><%= n.title %></td>
+                            
+                            <td>
+                                <span class="badge px-3 py-2 <%= n.targetType === 'All' ? 'badge-all' : n.targetType === 'Active' ? 'badge-active' : n.targetType === 'Left' ? 'badge-left' : 'badge-single' %>">
+                                    <%= n.targetType === 'All' ? 'सभी छात्र (All)' : n.targetType === 'Active' ? 'सक्रिय छात्र (Active)' : n.targetType === 'Left' ? 'छोड़ चुके (Left)' : 'विशिष्ट (Single)' %>
+                                </span>
+                            </td>
+                            
+                            <td>
+                                <% if(n.targetType === 'Single' && n.student) { %>
+                                    <span class="text-dark fw-semibold"><%= n.student.name %></span> <br>
+                                    <small class="text-muted">ID: <%= n.student.username %></small>
+                                <% } else { %>
+                                    <span class="text-muted">—</span>
+                                <% } %>
+                            </td>
+                            
+                            <td>
+                                <div class="text-wrap-custom text-secondary">
+                                    <%= n.description %>
+                                </div>
+                            </td>
+                            
+                            <td class="text-center">
+                                <form action="/admin/notice/<%= n._id %>?_method=DELETE" method="POST" onsubmit="return confirm('क्या आप सच में इस नोटिस को हमेशा के लिए डिलीट करना चाहते हैं? इससे यह छात्रों के डैशबोर्ड से भी हट जाएगा।');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0 rounded-circle p-2">
+                                        <i class="fa-solid fa-trash-can fa-lg"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="sendNoticeModal" tabindex="-1" aria-labelledby="sendNoticeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header text-white" style="background-color: #007A83; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <h5 class="modal-title fw-bold" id="sendNoticeModalLabel"><i class="fa-solid fa-bullhorn me-2"></i>नया नोटिस और ईमेल भेजें</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/admin/studentnotices" method="POST">
+                <div class="modal-body p-4">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted small">नोटिस का विषय (Subject)</label>
+                        <input type="text" name="notice[title]" class="form-control bg-light" placeholder="जैसे: आवश्यक बैठक या मेस फीस सूचना" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold text-muted small">किसको भेजना है? (Target Audience)</label>
+                            <select name="notice[targetType]" id="targetTypeSelect" class="form-select bg-light" onchange="toggleStudentSelect()" required>
+                                <option value="All">सभी पंजीकृत छात्रों को (All Registered)</option>
+                                <option value="Active">वर्तमान सक्रिय छात्रों को (Only Active Students)</option>
+                                <option value="Left">छात्रावास छोड़ चुके छात्रों को (Only Left Students)</option>
+                                <option value="Single">किसी एक विशिष्ट छात्र को (Particular Student)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 card p-3 bg-light border border-secondary-subtle" id="singleStudentContainer" style="display: none; position: relative;">
+                        <label class="form-label text-primary fw-bold mb-2">
+                            <i class="fa-solid fa-user-graduate me-1"></i> छात्र खोजें (Search Student)
+                        </label>
+                        
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-secondary-subtle"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                            <input type="text" id="studentSearchInput" class="form-control border-secondary-subtle" placeholder="छात्र का नाम या SKH ID टाइप करें..." oninput="filterStudentSuggestions()" autocomplete="off">
+                        </div>
+
+                        <input type="hidden" name="notice[specificStudent]" id="hiddenStudentId">
+
+                        <ul id="studentSuggestionsList" class="list-group position-absolute w-100 shadow-lg mt-1" style="z-index: 1050; max-height: 200px; overflow-y: auto; display: none; left: 0; padding: 0 15px;">
+                            <% allStudents.forEach(st => { %>
+                                <button type="button" class="list-group-item list-group-item-action text-start py-2" onclick="selectStudent('<%= st._id %>', '<%= st.name %> (<%= st.username %>)')">
+                                    <i class="fa-regular fa-user me-2 text-secondary"></i>
+                                    <strong><%= st.name %></strong> <span class="text-muted small">(<%= st.username %>)</span> — <span class="badge bg-opacity-10 <%= st.status === 'Active' ? 'bg-success text-success' : 'bg-danger text-danger' %> small" style="font-size: 10px;"><%= st.status %></span>
+                                </button>
+                            <% }) %>
+                        </ul>
+                        <div id="noStudentFound" class="text-danger small mt-1 ps-1" style="display: none;">❌ कोई छात्र नहीं मिला!</div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-muted small">नोटिस का पूरा विवरण (Description)</label>
+                        <textarea name="notice[description]" class="form-control bg-light" rows="6" placeholder="यहाँ अपना पूरा संदेश विस्तार से लिखें..." required></textarea>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-light p-3" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">रद्द करें</button>
+                    <button type="submit" class="btn btn-theme btn-sm fw-bold px-3">सुरक्षित करें और मेल भेजें</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleStudentSelect() {
+        const type = document.getElementById("targetTypeSelect").value;
+        const container = document.getElementById("singleStudentContainer");
+        const selectField = document.querySelector("select[name='notice[specificStudent]']");
+        
+        if(type === "Single") {
+            container.style.display = "block";
+            selectField.required = true;
+        } else {
+            container.style.display = "none";
+            selectField.required = false;
+            selectField.value = "";
+        }
+    }
+    function filterStudentSuggestions() {
+    const input = document.getElementById("studentSearchInput").value.toLowerCase();
+    const list = document.getElementById("studentSuggestionsList");
+    const buttons = list.getElementsByTagName("button");
+    const noResult = document.getElementById("noStudentFound");
+    const hiddenIdField = document.getElementById("hiddenStudentId");
+
+    // Agar input khali hai toh poori list chhupa do
+    if (!input) {
+        list.style.display = "none";
+        noResult.style.display = "none";
+        hiddenIdField.value = ""; // ID bhi khali kar do kyunki kuch select nahi hai
+        return;
+    }
+
+    let hasMatch = false;
+
+    // Har ek student button par loop chalakar filter karo
+    for (let i = 0; i < buttons.length; i++) {
+        const text = buttons[i].innerText.toLowerCase();
+        
+        if (text.includes(input)) {
+            buttons[i].style.display = "block";
+            hasMatch = true;
+        } else {
+            buttons[i].style.display = "none";
+        }
+    }
+
+    // Agar match mila toh list dikhao, nahi toh "No student found" dikhao
+    if (hasMatch) {
+        list.style.display = "block";
+        noResult.style.display = "none";
+    } else {
+        list.style.display = "none";
+        noResult.style.display = "block";
+        hiddenIdField.value = "";
+    }
+}
+
+    // 🔥 STUDENT SELECT HANDLING (Jab list ke kisi item par click ho)
+    function selectStudent(id, displayName) {
+        document.getElementById("hiddenStudentId").value = id;         // Database ke liye _id set hui
+        document.getElementById("studentSearchInput").value = displayName; // Input box me Name (SKH ID) dikhega
+        document.getElementById("studentSuggestionsList").style.display = "none"; // List gayab ho jayegi
+    }
+
+    // Global click event handler: Agar Warden dropdown ke bahaar kahi click kare toh suggestions close ho jayein
+    document.addEventListener("click", function (e) {
+        const list = document.getElementById("studentSuggestionsList");
+        const input = document.getElementById("studentSearchInput");
+        if (e.target !== input && !list.contains(e.target)) {
+            list.style.display = "none";
+        }
+    });
+</script>

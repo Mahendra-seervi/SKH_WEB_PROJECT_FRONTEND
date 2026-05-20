@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKH - Student Dashboard</title>
+    <link rel="icon" href="/skh.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .profile-img-container { position: relative; width: 140px; height: 140px; margin: 0 auto; }
+        .profile-img-container img { width: 140px; height: 140px; object-fit: cover; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .nav-tabs .nav-link { color: #495057; font-weight: 500; border: none; padding: 12px 20px; }
+        .nav-tabs .nav-link.active { color: #0d6efd; border-bottom: 3px solid #0d6efd; background: none; }
+        .card { border: none; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-radius: 12px; }
+        .table-responsive { white-space: nowrap; }
+    </style>
+</head>
+<body class="bg-light">
+ <%- include("../include/flash.ejs") %>
+<div class="container py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8 text-center text-md-start">
+            <h3 class="fw-bold mb-1">नमस्ते, <%= student.name %> 👋</h3>
+            <p class="text-muted mb-0">ID (Username): <span class="badge bg-dark"><%= student.username %></span> | Room: <span class="badge bg-primary"><%= student.room || 'Not Assigned' %></span></p>
+        </div>
+            <div class="col-md-4 text-center text-md-end mt-3 mt-md-0">
+                <span class="badge p-2 mb-2 d-inline-block <%= student.status === 'Active' ? 'bg-success' : 'bg-warning text-dark' %>"><%= student.status %> Account</span>
+                <br>
+                <a href="/" class="btn btn-sm btn-outline-dark mt-1 me-1">
+                 <i class="fa-solid fa-house me-1"></i> होम पेज
+                 </a>
+                
+                <button type="button" class="btn btn-sm btn-dark mt-1 me-1" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                    <i class="fa-solid fa-key me-1"></i> पासवर्ड बदलें
+                </button>
+            </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 mb-4">
+            <ul class="nav nav-tabs card flex-row p-2 list-group-horizontal overflow-x-auto border-0" id="dashboardTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-pane" type="button" role="tab"><i class="fa-regular fa-user me-2"></i>मेरी प्रोफाइल</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment-pane" type="button" role="tab"><i class="fa-solid fa-indian-rupee-sign me-2"></i>फीस रिकॉर्ड</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="notice-tab" data-bs-toggle="tab" data-bs-target="#notice-pane" type="button" role="tab"><i class="fa-regular fa-bell me-2"></i>सूचनाएं (<%= notices.length %>)</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="complaint-tab" data-bs-toggle="tab" data-bs-target="#complaint-pane" type="button" role="tab"><i class="fa-regular fa-comments me-2"></i>मेरी शिकायतें</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                     <a href="/student/logout" class="nav-link text-danger fw-bold"><i class="fa-solid fa-right-from-bracket me-2"></i>लॉगआउट</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="col-12">
+            <div class="tab-content" id="dashboardTabsContent">
+                
+                <div class="tab-pane fade show active" id="profile-pane" role="tabpanel">
+                    <form action="/student/dashboard/update" method="POST" enctype="multipart/form-data">
+                        <div class="row g-4">
+                            <div class="col-lg-4 text-center">
+                                <div class="card p-4 h-100 align-items-center justify-content-center">
+                                    <div class="profile-img-container mb-3">
+                                        <img src="<%= student.photo %>" id="profileView" alt="Photo">
+                                    </div>
+                                    <div class="mb-3 w-100" id="fileInputContainer" style="display: none;">
+                                        <label class="form-label small text-muted">नई फोटो अपलोड करें</label>
+                                        <input class="form-control form-control-sm" type="file" name="photo" accept="image/*">
+                                    </div>
+                                    <h5 class="fw-bold mb-1"><%= student.name %></h5>
+                                    <p class="text-muted small mb-0">गोत्र: <%= student.goatr %> | रक्त समूह: <%= student.Blood %></p>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-8">
+                                <div class="card p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="fw-bold m-0 text-primary">व्यक्तिगत और शैक्षणिक विवरण</h5>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="editBtn" onclick="enableEditing()"><i class="fa-regular fa-pen-to-square me-1"></i>विवरण बदलें</button>
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted small">पिता का नाम</label>
+                                            <input type="text" class="form-control" value="<%= student.Father_Name %>" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted small">जन्म तिथि</label>
+                                            <input type="text" class="form-control" value="<%= student.DOB.toDateString() %>" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted small">छात्र मोबाइल नंबर</label>
+                                            <input type="number" name="profile[Phone_student]" class="form-control editable-field" value="<%= student.Phone_student %>" disabled required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted small">अभिभावक मोबाइल नंबर</label>
+                                            <input type="text" name="profile[Phone_father]" class="form-control editable-field" value="<%= student.Phone_father %>" disabled required>
+                                        </div>
+                                        <div class="col-md-10">
+                                            <label class="form-label text-muted small">ईमेल आईडी</label>
+                                            <input type="email" name="profile[Email]" class="form-control editable-field" value="<%= student.Email %>" disabled>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label text-muted small">टी-शर्ट साइज</label>
+                                            <input type="text" name="profile[t_shirt]" class="form-control <%= isAdmissionOpen ? 'editable-field' : '' %>" value="<%= student.t_shirt %>"disabled required >
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label text-muted small">स्थायी पता</label>
+                                            <textarea name="profile[Address]" class="form-control editable-field" rows="2" disabled required><%= student.Address %></textarea>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label text-muted small">पिनकोड</label>
+                                            <input type="number" name="profile[Pincode]" class="form-control editable-field" value="<%= student.Pincode %>" disabled required>
+                                        </div>
+                                        
+                                        <div class="col-md-8">
+                                            <label class="form-label text-muted small">वर्तमान शैक्षणिक योग्यता</label>
+                                            <input type="text" name="education[Qualification]" class="form-control <%= isAdmissionOpen ? 'editable-field' : '' %>" value="<%= student.Qualification %>" disabled required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted small">पिछला संस्थान</label>
+                                            <input type="text" name="education[last_institute]" class="form-control <%= isAdmissionOpen ? 'editable-field' : '' %>" value="<%= student.last_institute %>" disabled required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted small">वर्तमान संस्थान</label>
+                                            <input type="text" name="education[Current_institute]" class="form-control <%= isAdmissionOpen ? 'editable-field' : '' %>" value="<%= student.Current_institute %>" disabled required>
+                                        </div>
+                                        <% if(!isAdmissionOpen) { %>
+                                            <div class="col-12"><small class="text-danger"><i class="fa-solid fa-circle-info me-1"></i>नया सत्र बंद होने के कारण शैक्षणिक विवरण अभी नहीं बदले जा सकते।</small></div>
+                                        <% } %>
+                                    </div>
+                                    <div class="mt-4 text-end" id="actionButtons" style="display: none;">
+                                        <button type="button" class="btn btn-secondary me-2" onclick="window.location.reload()">रद्द करें</button>
+                                        <button type="submit" class="btn btn-success">बदलाव सुरक्षित करें</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="tab-pane fade" id="payment-pane" role="tabpanel">
+                    <div class="card p-4">
+                        <h5 class="fw-bold mb-3 text-primary">फीस भुगतान का इतिहास</h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>विवरण (Fee Type)</th>
+                                        <th>महीना (Month)</th>
+                                        <th>राशि (Amount)</th>
+                                        <th>रसीद संख्या (Transaction ID)</th>
+                                        <th>दिनांक</th>
+                                        <th>स्थिति (Status)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if(payments.length === 0) { %>
+                                        <tr><td colspan="6" class="text-center text-muted py-4">कोई फीस रिकॉर्ड नहीं मिला।</td></tr>
+                                    <% } %>
+                                    <% payments.forEach(p => { %>
+                                        <tr>
+                                            <td class="fw-semibold"><%= p.type %></td>
+                                            <td><%= p.month %></td>
+                                            <td>₹<%= p.amount %></td>
+                                            <td><code><%= p.transactionId || 'N/A' %></code></td>
+                                            <td><%= p.date.toDateString() %></td>
+                                            <td><span class="badge <%= p.status === 'Paid' ? 'bg-success' : 'bg-danger' %>"><%= p.status %></span></td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="notice-pane" role="tabpanel">
+                    <div class="card p-4">
+                        <h5 class="fw-bold mb-3 text-primary">आधिकारिक सूचनाएं</h5>
+                        <% if(notices.length === 0) { %>
+                            <div class="text-center text-muted py-4">कोई विशिष्ट सूचना उपलब्ध नहीं है।</div>
+                        <% } %>
+                        <% notices.forEach(n => { %>
+                            <div class="border-start border-4 border-info p-3 mb-3 bg-light rounded-end">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h6 class="fw-bold m-0 text-dark"><%= n.title %></h6>
+                                    <small class="text-muted"><%= n.date.toLocaleDateString() %></small>
+                                </div>
+                                <p class="mb-0 text-secondary small"><%= n.description %></p>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="complaint-pane" role="tabpanel">
+                    <div class="card p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold m-0 text-primary">शिकायतें और उनके निवारण</h5>
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#addComplaintModal">
+                                <i class="fa-solid fa-circle-plus me-1"></i> नयी शिकायत दर्ज करें
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>विषय (Title)</th>
+                                        <th>श्रेणी (Category)</th>
+                                        <th>विवरण (Description)</th>
+                                        <th>स्थिति</th>
+                                        <th>वार्डन प्रतिक्रिया (Warden Reply)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if(complaints.length === 0) { %>
+                                        <tr><td colspan="5" class="text-center text-muted py-4">कोई शिकायत दर्ज नहीं की गई है।</td></tr>
+                                    <% } %>
+                                    <% complaints.forEach(c => { %>
+                                        <tr>
+                                            <td class="fw-semibold"><%= c.title %></td>
+                                            <td><span class="badge bg-secondary"><%= c.category %></span></td>
+                                            <td><small class="text-wrap d-block" style="max-width: 250px;"><%= c.description %></small></td>
+                                            <td>
+                                                <span class="badge <%= c.status === 'Solved' ? 'bg-success' : c.status === 'Pending' ? 'bg-warning text-dark' : 'bg-info' %>">
+                                                    <%= c.status %>
+                                                </span>
+                                            </td>
+                                            <td class="text-muted small"><%= c.wardenReply || 'प्रतिक्रिया की प्रतीक्षा है...' %></td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header bg-dark text-white" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <h5 class="modal-title fw-bold" id="changePasswordModalLabel"><i class="fa-solid fa-lock me-2"></i>खाता सुरक्षा (पासवर्ड बदलें)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="px-4 pt-3">
+                <div id="studentAlertBox" class="alert d-none small py-2 rounded-3 mb-0"></div>
+            </div>
+
+            <div id="studentPasswordStep">
+                <form id="studentPasswordForm">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-semibold">वर्तमान पुराना पासवर्ड</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-unlock text-secondary"></i></span>
+                                <input type="password" name="oldPassword" class="form-control border-start-0 bg-light" placeholder="पुराना पासवर्ड दर्ज करें" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-semibold">नया सुरक्षित पासवर्ड</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-key text-secondary"></i></span>
+                                <input type="password" id="studentNewPwd" name="newPassword" class="form-control border-start-0 bg-light" placeholder="नया पासवर्ड (कम से कम 6 अक्षर)" minlength="6" required>
+                            </div>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label text-muted small fw-semibold">नये पासवर्ड की पुष्टि करें</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-circle-check text-secondary"></i></span>
+                                <input type="password" id="studentConfPwd" class="form-control border-start-0 bg-light" placeholder="नया पासवर्ड दोबारा दर्ज करें" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light p-3" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">रद्द करें</button>
+                        <button type="submit" id="studentPwdBtn" class="btn btn-primary btn-sm">OTP प्राप्त करें</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="studentOtpStep" class="d-none">
+                <form id="studentOtpForm">
+                    <input type="hidden" id="studentCachedPwd" name="pendingPassword">
+                    <div class="modal-body p-4">
+                        <div class="bg-light p-3 rounded-3 border mb-3 text-center">
+                            <h6 class="fw-bold text-dark mb-1"><i class="fa-solid fa-envelope-open-text text-primary me-1"></i> ईमेल वेरिफिकेशन</h6>
+                            <p class="text-muted small mb-0">आपके रजिस्टर्ड ईमेल पर 6-अंकों का सुरक्षा OTP भेजा गया है।</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-semibold">दर्ज करें 6-डिजिट OTP</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-shield text-secondary"></i></span>
+                                <input type="text" name="otpInput" class="form-control border-start-0 bg-light text-center fw-bold font-monospace" placeholder="000000" maxlength="6" pattern="\d{6}" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light p-3" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                        <button type="button" onclick="window.location.reload()" class="btn btn-secondary btn-sm">रद्द करें</button>
+                        <button type="submit" id="studentOtpBtn" class="btn btn-success btn-sm">वेरीफाई एवं अपडेट करें</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="addComplaintModal" tabindex="-1" aria-labelledby="addComplaintModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header bg-danger text-white" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <h5 class="modal-title fw-bold" id="addComplaintModalLabel"><i class="fa-regular fa-comment-dots me-2"></i>नयी शिकायत दर्ज करें</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/student/dashboard/complaint" method="POST">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-semibold">शिकायत की श्रेणी (Category)</label>
+                        <select name="complaint[category]" class="form-select bg-light" required>
+                            <option value="Mess">भोजन (Mess)</option>
+                            <option value="Room">कमरा (Room)</option>
+                            <option value="Electricity">बिजली (Electricity)</option>
+                            <option value="Water">पानी (Water)</option>
+                            <option value="Other">अन्य (Other)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-semibold">शिकायत का विषय (Subject)</label>
+                        <input type="text" name="complaint[title]" class="form-control bg-light" placeholder="जैसे: रूम की लाइट खराब है" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-semibold">शिकायत का पूरा विवरण (Description)</label>
+                        <textarea name="complaint[description]" class="form-control bg-light" rows="4" placeholder="अपनी समस्या के बारे में विस्तार से लिखें..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light p-3" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">रद्द करें</button>
+                    <button type="submit" class="btn btn-danger btn-sm">शिकायत सबमिट करें</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById("studentPasswordForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const alertBox = document.getElementById("studentAlertBox");
+        const newPwd = document.getElementById("studentNewPwd").value;
+        const confPwd = document.getElementById("studentConfPwd").value;
+        const submitBtn = document.getElementById("studentPwdBtn");
+
+        if (newPwd !== confPwd) {
+            alertBox.className = "alert alert-danger small py-2";
+            alertBox.innerHTML = "नया पासवर्ड और पुष्टि किया गया पासवर्ड मेल नहीं खाते!";
+            alertBox.classList.remove("d-none");
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = "कृपया प्रतीक्षा करें...";
+
+        try {
+            const searchParams = new URLSearchParams(new FormData(this));
+            const response = await fetch("/student/dashboard/password-request", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: searchParams
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                alertBox.className = "alert alert-warning small py-2";
+                alertBox.innerHTML = data.message;
+                alertBox.classList.remove("d-none");
+                
+                document.getElementById("studentCachedPwd").value = newPwd;
+                document.getElementById("studentPasswordStep").classList.add("d-none");
+                document.getElementById("studentOtpStep").classList.remove("d-none");
+            } else {
+                alertBox.className = "alert alert-danger small py-2";
+                alertBox.innerHTML = data.message;
+                alertBox.classList.remove("d-none");
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = "OTP प्राप्त करें";
+            }
+        } catch (err) {
+            alertBox.className = "alert alert-danger small py-2";
+            alertBox.innerHTML = "सर्वर से संपर्क नहीं हो पाया।";
+            alertBox.classList.remove("d-none");
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = "OTP प्राप्त करें";
+        }
+    });
+
+    document.getElementById("studentOtpForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const alertBox = document.getElementById("studentAlertBox");
+        const otpBtn = document.getElementById("studentOtpBtn");
+
+        otpBtn.disabled = true;
+        otpBtn.innerHTML = "वेरीफाई हो रहा है...";
+
+        try {
+            const searchParams = new URLSearchParams(new FormData(this));
+            const response = await fetch("/student/dashboard/password-verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: searchParams
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                alertBox.className = "alert alert-success small py-2";
+                alertBox.innerHTML = data.message;
+                alertBox.classList.remove("d-none");
+                setTimeout(() => { window.location.reload(); }, 2000);
+            } else {
+                alertBox.className = "alert alert-danger small py-2";
+                alertBox.innerHTML = data.message;
+                alertBox.classList.remove("d-none");
+                otpBtn.disabled = false;
+                otpBtn.innerHTML = "वेरीफाई एवं अपडेट करें";
+            }
+        } catch (err) {
+            alertBox.className = "alert alert-danger small py-2";
+            alertBox.innerHTML = "वेरीफिकेशन फेल हुआ।";
+            alertBox.classList.remove("d-none");
+            otpBtn.disabled = false;
+            otpBtn.innerHTML = "वेरीफाई एवं अपडेट करें";
+        }
+    });
+
+        function enableEditing() {
+        document.querySelectorAll('.editable-field').forEach(field => field.disabled = false);
+        document.getElementById('fileInputContainer').style.display = 'block';
+        document.getElementById('actionButtons').style.display = 'block';
+        document.getElementById('editBtn').style.display = 'none';
+    }
+</script>
+</body>
+</html>

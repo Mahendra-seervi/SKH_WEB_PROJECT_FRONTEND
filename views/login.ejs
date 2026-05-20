@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Sirvi Kisan Hostel</title>
+    <link rel="icon" href="/skh.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/login.css">
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <div class="login-card shadow-lg">
+            <div class="row g-0 h-100">
+                
+                <div class="col-lg-5 login-left text-center text-white p-4 d-flex flex-column justify-content-center align-items-center">
+                    <div class="logo-box mb-3">
+                        <img src="/SKH_logo.jpg" alt="SKH Logo">
+                    </div>
+                    <h3 class="fw-bold mb-1">Sirvi Kisan Hostel</h3>
+                    <p class="small opacity-75">Education & Discipline</p>
+                    <div class="d-none d-lg-block mt-4">
+                        <p class="px-4 small italic">"Swasth Tan, Swachh Man, Shreshtha Jeevan"</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-7 login-right bg-white p-4 p-md-5 d-flex flex-column justify-content-center">
+                    <div class="form-header mb-4">
+                        <h2 class="fw-bold text-dark">Login</h2>
+                    </div>
+                    <%- include("./include/flash.ejs") %>
+
+                    <form action="/login" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted text-uppercase">SKH ID / Username</label>
+                            <div class="input-group custom-input">
+                                <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                                <input type="text" name="username" class="form-control" placeholder="Your Unique ID" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Password</label>
+                            <div class="input-group custom-input">
+                                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <a href="/forgot-password" class="forgot-link">Forgot Password?</a>
+                        </div>
+
+                        <button type="submit" class="btn btn-teal w-100 py-3 shadow-sm">Sign In</button>
+                    </form>
+
+                    <div class="text-center mt-5">
+                        <a href="/" class="back-link text-decoration-none">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</html>

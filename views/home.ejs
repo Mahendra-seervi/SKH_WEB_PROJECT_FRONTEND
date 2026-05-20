@@ -1,0 +1,72 @@
+<% layout('/layout/boilerplate.ejs') -%>
+
+<section class="hero-slider">
+    <div class="slider-container">
+        <% if (typeof sliders !== 'undefined' && sliders.length > 0) { %>
+            <% sliders.forEach((slide, index) => { %>
+                <% if (slide.isActive) { %>
+                    <div class="hero-slide <%= index === 0 ? 'active' : '' %>">
+                        <img src="<%= slide.link %>" alt="<%= slide.name %>">
+
+                    </div>
+                <% } %>
+            <% }) %>
+        <% } else { %>
+            <div class="hero-slide active">
+                <img src="https://images.unsplash.com/photo-1555854817-5b2260d15050?q=80&w=2070&auto=format&fit=crop" alt="Default">
+                <div class="slide-overlay">
+                    <p>Welcome to Sirvi Kisan Hostel</p>
+                </div>
+            </div>
+        <% } %>
+
+        <button class="slider-btn prev" onclick="move(-1)">&#10094;</button>
+        <button class="slider-btn next" onclick="move(1)">&#10095;</button>
+
+        <div class="dots-container">
+            <% if (typeof sliders !== 'undefined' && sliders.length > 0) { %>
+                <% sliders.forEach((slide, index) => { %>
+                    <span class="dot <%= index === 0 ? 'active' : '' %>" onclick="current(<%= index  %>)"></span>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+
+
+<section class="updates-section">
+    <div class="updates-container">
+        
+        <div class="updates-header">
+           Notice
+        </div>
+
+        <div class="updates-box">
+            <ul class="updates-list">
+                
+                <% if (announcements && announcements.length > 0) { %>
+                    <% for(let notice of announcements) { %>
+                        
+                        <li>
+                            <span class="icon">📄</span> 
+                            
+                            <a href="<%= notice.link %>" class="notice-link" target="_blank">
+                                <%= notice.title %> - <span class="notice-date">(<%= notice.date.toLocaleDateString('en-GB') %>)</span>
+                            </a>
+
+                            <% if(notice.isImportant) { %>
+                                <span class="new-badge">New!</span>
+                            <% } %>
+                        </li>
+
+                    <% } %>
+                <% } else { %>
+                    <li><span class="icon">ℹ️</span> No new updates at this time.</li>
+                <% } %>
+
+            </ul>
+        </div>
+
+    </div>
+</section>

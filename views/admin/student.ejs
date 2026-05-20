@@ -1,0 +1,178 @@
+<% layout('layout/admin-lyout') -%>
+
+<div class="container-fluid mt-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm border-start border-teal border-4">
+        <div>
+            <h3 class="fw-bold m-0 text-dark">विद्यार्थी प्रबंधन (Student Management)</h3>
+            <p class="text-muted small mb-0">Manage applications, IDs, and student status</p>
+            <div>
+                <form action="/admin/students/close-session" method="POST" onsubmit="return confirm('⚠️ चेतावनी: क्या आप सच में इस वर्ष का हॉस्टल सेशन क्लोज करना चाहते हैं? इससे सभी Current (हॉस्टल में) छात्रों की स्थिति बदलकर Left (भूतपूर्व) हो जाएगी और कमरे खाली हो जाएंगे!')">
+                    <button type="submit" class="btn btn-sm btn-danger fw-bold shadow-sm px-3 py-2">
+                        <i class="fa-solid fa-circle-xmark me-1"></i> Close Current Session
+                    </button>
+                </form>
+            </div>
+        </div>
+            <div>
+                <form action="/admin/admission-toggle" method="POST" class="d-flex align-items-center gap-2">
+
+                    <% if(admissionsettings.isAdmissionOpen) { %>
+
+                        <span class="badge bg-success fs-6 px-3 py-2">
+                            Admission Open
+                        </span>
+
+                        <button type="submit" class="btn btn-outline-danger">
+                            Close Admission
+                        </button>
+
+                    <% } else { %>
+
+                        <span class="badge bg-danger fs-6 px-3 py-2">
+                            Admission Closed
+                        </span>
+
+                        <button type="submit" class="btn btn-outline-success">
+                            Open Admission
+                        </button>
+
+                    <% } %>
+
+                </form>
+            </div>
+
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="input-group shadow-sm border rounded-3 overflow-hidden">
+                <span class="input-group-text bg-white border-0"><i class="fa-solid fa-magnifying-glass text-teal"></i></span>
+                <input type="text" id="studentSearch" list="studentSuggestions" class="form-control border-0 py-2" placeholder="नाम या SKH-ID से खोजें...">
+                <datalist id="studentSuggestions">
+                    <% for(let student of allStudents) { %>
+                        <option value="<%= student.name %>">
+                        <% if(student.username ){ %> <option value="<%= student.username %>"> <% } %>
+                    <% } %>
+                </datalist>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <form action="/admin/students/search-aadhar" method="POST" class="input-group shadow-sm border rounded-3 overflow-hidden">
+                <span class="input-group-text bg-light border-0"><i class="fa-solid fa-id-card-clip"></i></span>
+                <input type="password" name="aadharInput" class="form-control border-0 py-2" placeholder="आधार से गहरा मिलान करें (12-digit)..." maxlength="12" required>
+                <button type="submit" class="btn btn-dark border-0 px-4">Match Aadhar</button>
+            </form>
+            <div class="x-small text-muted mt-1 ms-2">सुरक्षा के लिए आधार सर्च एन्क्रिप्टेड है।</div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <div class="btn-group shadow-sm flex-wrap w-100" role="group">
+                <a href="/admin/students?status=Pending" class="btn btn-outline-teal <%= currentStatus === 'Pending' ? 'active' : '' %>">Pending (नए फॉर्म)</a>
+                <a href="/admin/students?status=Approved" class="btn btn-outline-teal <%= currentStatus === 'Approved' ? 'active' : '' %>">Approved (बिना पासवर्ड)</a>
+                <a href="/admin/students?status=Left" class="btn btn-outline-teal <%= currentStatus === 'Left' ? 'active' : '' %>">Left (भूतपूर्व)</a>
+                <a href="/admin/students?status=Active" class="btn btn-outline-teal <%= currentStatus === 'Active' ? 'active' : '' %>">Current (हॉस्टल में)</a>
+                <a href="/admin/students?status=Blocked" class="btn btn-outline-danger <%= currentStatus === 'Blocked' ? 'active' : '' %>">Blocked (बंद)</a>
+                <a href="/admin/students" class="btn btn-teal <%= !currentStatus ? 'active' : '' %>">All (सभी रिकॉर्ड)</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">फोटो & नाम</th>
+                        <th>पहचान (ID)</th>
+                        <th>मोबाइल नंबर</th>
+                        <th>स्थिति (Status)</th>
+                        <th class="text-center">प्रोफाइल</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTableBody">
+                    <% if(students.length === 0) { %>
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-user-slash fs-1 d-block mb-2"></i>
+                                कोई रिकॉर्ड नहीं मिला।
+                            </td>
+                        </tr>
+                    <% } else { %>
+                        <% for(let student of students) { %>
+                        <tr class="student-row" data-name="<%= student.name.toLowerCase() %>" data-id="<%= student.username ? student.username.toLowerCase() : '' %>">
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <img src="<%= student.photo %>" class="rounded-circle border border-2 border-teal" width="50" height="50" style="object-fit: cover;">
+                                    <div class="ms-3">
+                                        <div class="fw-bold"><%= student.name %></div>
+                                        <div class="text-muted x-small">पिता: <%= student.Father_Name %></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-teal-light text-teal border border-teal-subtle"><%= student.username || 'PENDING' %></span>
+                            </td>
+                            <td>
+                                <div class="small"><i class="fa-solid fa-phone me-1 text-muted"></i> <%= student.Phone_student %></div>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill 
+                                    <%= student.status === 'Active' ? 'bg-success' : '' %>
+                                    <%= student.status === 'Pending' ? 'bg-warning text-dark' : '' %>
+                                    <%= student.status === 'Approved' ? 'bg-info text-dark' : '' %>
+                                    <%= student.status === 'Left' ? 'bg-secondary' : '' %>
+                                    <%= student.status === 'Blocked' ? 'bg-danger' : '' %>">
+                                    <%= student.status %>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <a href="/admin/students/<%= student._id %>" class="btn btn-sm btn-white border shadow-sm rounded-pill px-3">
+                                    Profile <i class="fa-solid fa-chevron-right ms-1 small"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <% } %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Name/ID Search Script
+    document.getElementById('studentSearch').addEventListener('input', function() {
+        const filter = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.student-row');
+        rows.forEach(row => {
+            const name = row.getAttribute('data-name');
+            const id = row.getAttribute('data-id');
+            row.style.display = (name.includes(filter) || id.includes(filter)) ? '' : 'none';
+        });
+    });
+
+    // Admission Toggle Script
+    document.getElementById('admissionToggle').addEventListener('change', async function() {
+        const status = this.checked;
+        try {
+            await fetch(`/admin/settings/toggle-admission?status=${status}`, { method: 'POST' });
+            alert(status ? "प्रवेश फॉर्म चालू कर दिया गया है!" : "प्रवेश फॉर्म बंद कर दिया गया है!");
+        } catch (err) {
+            alert("त्रुटि: स्टेटस बदल नहीं पाया।");
+            this.checked = !status;
+        }
+    });
+</script>
+
+<style>
+    .text-teal { color: #007A83; }
+    .bg-teal-light { background-color: #e6f2f3; }
+    .btn-teal { background-color: #007A83; color: white; }
+    .btn-teal:hover { background-color: #005a61; color: white; }
+    .btn-outline-teal { color: #007A83; border-color: #007A83; }
+    .btn-outline-teal:hover, .btn-outline-teal.active { background-color: #007A83; color: white; }
+    .x-small { font-size: 0.75rem; }
+</style>

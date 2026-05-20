@@ -1,0 +1,43 @@
+    <nav class="navbar">
+    <div class="navbar-brand">
+        <img src="/SKH_logo.jpg" alt="Hostel Logo"> 
+        <span id="logoText">SIRVI KISAN HOSTEL-PALI</span>
+    </div>
+    
+    <input type="checkbox" id="menu-toggle">
+    <label for="menu-toggle" class="menu-icon"></label> 
+
+    <ul class="nav-links">
+        <li><a href="/" class="<%= currentPage === '/' ? 'active' : '' %>">Home</a></li>
+        <li>
+            <a class="<%= currentPage === '/aboutHostel' || currentPage === '/about/warden' ? 'active' : '' %>">About &#x25BC;</a>
+            <ul class="dropdown">
+                <li><a href="/aboutHostel">About Hostel</a></li>
+                <li><a href="#">Hostel History</a></li>
+                <li><a href="/about/warden"  class="<%= currentPage === '/about/warden' ? 'active' : '' %>">Warden</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#">Facilities &#x25BC;</a>
+            <ul class="dropdown">
+                <li><a href="#">Rooms</a></li>
+                <li><a href="#">Mess</a></li>
+                <li><a href="#">Library</a></li>
+                <li><a href="#">Security</a></li>
+            </ul>
+        </li>
+        <li><a href="/gallery" class="<%= currentPage === '/gallery' ? 'active' : '' %>">Gallery</a></li>
+        <li><a href="#">sponsor</a></li>
+       <% if(!currUser) { %>
+            <li class="login-btn">
+                <a href="/login"><i class="fa-solid fa-right-to-bracket me-1"></i>Login</a>
+            </li>
+        <% } else { %>
+            <li class="profile-icon-btn">
+                <a href="<%= currUser.acceptpolicy !== undefined ? '/student' : '/admin' %>" title="मेरी प्रोफाइल">
+                    <i class="fa-solid fa-circle-user fa-xl text-primary"></i>
+                </a>
+            </li>
+        <% } %>
+    </ul>
+</nav>

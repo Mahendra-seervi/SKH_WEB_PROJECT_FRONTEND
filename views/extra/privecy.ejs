@@ -1,0 +1,173 @@
+<% layout('/layout/boilerplate.ejs') -%>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-11 col-xl-10">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="bg-teal text-white p-5 text-center">
+                    <h1 class="fw-bold display-5 mb-2">निजता नीति (Privacy Policy)</h1>
+                    <p class="lead opacity-75">सीरवी किसान छात्रावास-पाली | आपकी सुरक्षा, हमारी प्राथमिकता</p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <div class="mb-5 text-center">
+                        <p class="fs-5 text-muted">इस पेज का उद्देश्य आपको यह बताना है कि हम आपके द्वारा दिए गए डेटा का उपयोग कैसे करते हैं और उसे कितना सुरक्षित रखते हैं।</p>
+                    </div>
+
+                    <section class="mb-5">
+                        <h3 class="fw-bold text-teal border-bottom pb-2 mb-4">
+                            <i class="fa-solid fa-database me-2"></i> हम कौन सी जानकारी एकत्र करते हैं?
+                        </h3>
+                        <p class="text-secondary">छात्रावास में प्रवेश और अनुशासन बनाए रखने के लिए हम निम्नलिखित जानकारी अनिवार्य रूप से लेते हैं:</p>
+                        <div class="row g-4 mt-1">
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 bg-light h-100">
+                                    <h6 class="fw-bold"><i class="fa-solid fa-id-card text-teal me-2"></i> व्यक्तिगत पहचान</h6>
+                                    <ul class="small mb-0">
+                                        <li>पूरा नाम और पिता का नाम</li>
+                                        <li>जन्म तिथि (DOB) और आयु</li>
+                                        <li>आधार कार्ड नंबर (पूरी तरह सुरक्षित)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 bg-light h-100">
+                                    <h6 class="fw-bold"><i class="fa-solid fa-phone-volume text-teal me-2"></i> संपर्क विवरण</h6>
+                                    <ul class="small mb-0">
+                                        <li>आपका निजी मोबाइल नंबर</li>
+                                        <li>माता-पिता या अभिभावक का मोबाइल नंबर</li>
+                                        <li>स्थायी घर का पता (Address)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 bg-light h-100">
+                                    <h6 class="fw-bold"><i class="fa-solid fa-notes-medical text-teal me-2"></i> स्वास्थ्य जानकारी</h6>
+                                    <ul class="small mb-0">
+                                        <li>ब्लड ग्रुप (आपातकाल के लिए)</li>
+                                        <li>वजन (Physical Record के लिए)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 bg-light h-100">
+                                    <h6 class="fw-bold"><i class="fa-solid fa-user-lock text-teal me-2"></i> सुरक्षा विवरण</h6>
+                                    <ul class="small mb-0">
+                                        <li>लॉगिन पासवर्ड (Hash रूप में)</li>
+                                        <li>प्रोफाइल फोटो</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="mb-5 p-4 bg-teal-light rounded-4 border-start border-5 border-teal">
+                        <h3 class="fw-bold text-teal mb-4">
+                            <i class="fa-solid fa-shield-halved me-2"></i> "Hashing" तकनीक: आपका डेटा हम भी नहीं देख सकते!
+                        </h3>
+                        <p>हॉस्टल की वेबसाइट पर आपके <strong>पासवर्ड</strong> और <strong>आधार नंबर</strong> को सबसे उन्नत सुरक्षा तकनीक <strong>(Hashing)</strong> से सुरक्षित किया गया है।</p>
+                        
+                        <div class="bg-white p-4 rounded-3 border mb-4">
+                            <h6 class="fw-bold text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i> यह कैसे काम करता है?</h6>
+                            <p class="small">जब आप अपना पासवर्ड या आधार नंबर डालते हैं, तो हमारा सिस्टम उसे सीधे सेव करने के बजाय एक गणितीय अल्गोरिदम (Algorithm) के जरिए एक अनोखे "डिजिटल कोड" में बदल देता है।</p>
+                            
+                            <div class="row align-items-center text-center g-3 mt-2">
+                                <div class="col-12 col-md-4">
+                                    <div class="p-2 border rounded bg-light small">आपका असली डेटा<br><strong>1234-5678</strong></div>
+                                </div>
+
+                                <div class="col-12 col-md-1">
+                                    <div class="d-md-none"><i class="fa-solid fa-arrow-down text-teal"></i></div>
+                                    <div class="d-none d-md-block text-teal"><i class="fa-solid fa-arrow-right"></i></div>
+                                </div>
+
+                                <div class="col-12 col-md-2">
+                                    <span class="badge bg-teal p-2 w-100">HASH PROCESS</span>
+                                </div>
+
+                                <div class="col-12 col-md-1">
+                                    <div class="d-md-none"><i class="fa-solid fa-arrow-down text-teal"></i></div>
+                                    <div class="d-none d-md-block text-teal"><i class="fa-solid fa-arrow-right"></i></div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="p-2 border rounded bg-dark text-white small">सुरक्षित कोड (Hash)<br><strong>$2b$10$7Xy...z9P</strong></div>
+                                </div>
+                            </div>
+                            
+                            <p class="mt-4 mb-0 small"><strong>सबसे बड़ी बात:</strong> इस कोड को वापस असली नंबर में नहीं बदला जा सकता। इसका मतलब है कि यदि कोई हॉस्टल का डेटाबेस खोल भी le, तो उसे आपका असली आधार नंबर या पासवर्ड कभी नहीं दिखेगा।</p>
+                        </div>
+
+                        <div class="alert alert-warning border-0 mb-0 shadow-sm">
+                            <i class="fa-solid fa-check-double me-2"></i> <strong>केवल वेरिफिकेशन के लिए:</strong> आधार नंबर का उपयोग केवल आपके रजिस्ट्रेशन को सत्यापित (Verify) करने के लिए किया जाता है ताकि कोई दूसरा व्यक्ति आपके नाम का गलत उपयोग न कर सके।
+                        </div>
+                    </section>
+
+                    <section class="mb-5">
+                        <h3 class="fw-bold text-teal border-bottom pb-2 mb-4">
+                            <i class="fa-solid fa-camera-retro me-2"></i> गैलरी और मीडिया पॉलिसी
+                        </h3>
+                        <div class="card border-0 bg-light p-3">
+                            <ul class="mb-0">
+                                <li class="mb-2">हॉस्टल के उत्सवों और कार्यक्रमों की फोटो का उपयोग केवल समाज की यादों और वेबसाइट के प्रदर्शन के लिए किया जाएगा।</li>
+                                <li class="mb-2">किसी भी छात्र की व्यक्तिगत फोटो बिना उसकी सहमति के सार्वजनिक नहीं की जाएगी।</li>
+                                <li>यदि आपको गैलरी की किसी फोटो से आपत्ति है, तो आप तुरंत वार्डन को सूचित कर सकते हैं, उसे 24 घंटे के भीतर हटा दिया जाएगा।</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section class="mb-5 p-4 rounded-4" style="background-color: #f0fdfa; border-left: 5px solid #007A83;">
+                        <h3 class="fw-bold text-teal mb-4">
+                            <i class="fa-solid fa-clock-rotate-left me-2"></i> 4. लाइफ-टाइम रिकॉर्ड (Life-time Records)
+                        </h3>
+                        <p>छात्रावास की यह नीति है कि हम अपने विद्यार्थियों का डेटा सुरक्षित रूप से <strong>हमेशा (Life-time)</strong> के लिए अपने रिकॉर्ड में रखते हैं। इसके पीछे दो मुख्य कारण हैं:</p>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm p-3">
+                                    <h6 class="fw-bold text-teal"><i class="fa-solid fa-history me-2"></i> ऐतिहासिक रिकॉर्ड (History)</h6>
+                                    <p class="small text-muted mb-0">यह इस बात का प्रमाण रहता है कि आप सीरवी किसान छात्रावास के गौरवशाली सदस्य रहे हैं। भविष्य में किसी भी सत्यापन (Verification) के लिए यह रिकॉर्ड काम आता है।</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm p-3">
+                                    <h6 class="fw-bold text-teal"><i class="fa-solid fa-user-plus me-2"></i> दोबारा प्रवेश में आसानी</h6>
+                                    <p class="small text-muted mb-0">यदि आप पढ़ाई के लिए कुछ समय बाद दोबारा छात्रावास में प्रवेश लेते हैं, तो आपको फिर से पूरी जानकारी भरने की जरूरत नहीं होगी। आपके पुराने रिकॉर्ड से ही आपका एडमिशन तुरंत कर दिया जाएगा।</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 alert alert-secondary border-0 small">
+                            <i class="fa-solid fa-shield-halved me-2"></i> <strong>सुरक्षा नोट:</strong> डेटा चाहे कितने ही समय तक रखा जाए, उसकी <strong>Hashing (सुरक्षा)</strong> वैसी ही रहेगी। आपका पासवर्ड और आधार नंबर कभी भी किसी को (यहाँ तक कि स्टाफ को भी) नहीं दिखेगा।
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-teal { background-color: #007A83 !important; }
+    .text-teal { color: #007A83 !important; }
+    .bg-teal-light { background-color: #e0f2f1; }
+    .border-teal { border-color: #007A83 !important; }
+    .btn-teal { background-color: #007A83; color: white; border: none; transition: 0.3s; }
+    .btn-teal:hover { background-color: #005a61; color: white; transform: translateY(-2px); }
+    
+    .card-body p {
+        line-height: 1.7;
+        color: #444;
+    }
+    
+    .list-group-item {
+        background: transparent;
+        padding-left: 0;
+        border: none;
+        color: #555;
+    }
+
+    /* Animation for icons */
+    .fa-solid { transition: 0.3s; }
+    section:hover .fa-solid { transform: scale(1.2); }
+</style>

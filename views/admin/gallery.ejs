@@ -1,0 +1,150 @@
+<% layout('/layout/admin-lyout.ejs') -%>
+
+<div class="container-fluid py-4 px-3 px-md-5">
+    <h2 class="fw-bold text-teal mb-4 d-flex align-items-center">
+        <i class="fa-solid fa-images me-2"></i>
+        <span class="d-none d-sm-inline">Gallery & Slider Management</span>
+        <span class="d-inline d-sm-none">Gallery Setup</span>
+    </h2>
+
+    <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-3 fs-4 text-warning"></i>
+        <div>
+            <strong class="text-dark">Important Notice:</strong> 
+            Slider ke liye hamesha <strong>same ratio (16:9)</strong> ki photos hi upload karein. 
+            (Example: 1920x1080 pixels). Isse website ka look professional rahega.
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100 rounded-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-teal mb-3"><i class="fa-solid fa-sliders me-2"></i>Add Slider Photo</h6>
+                    <form action="/admin/slider" method="POST" enctype="multipart/form-data">
+                        <div class="row g-2">
+                            <div class="col-12 col-sm-6">
+                                <input type="text" name="name" class="form-control border-2 shadow-none" placeholder="Photo Name" required>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <input type="file" name="image" class="form-control border-2 shadow-none" required>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-teal w-100 fw-bold mt-2 py-2">Add to Slider</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100 rounded-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-teal mb-3"><i class="fa-solid fa-camera-retro me-2"></i>Add Gallery Photo</h6>
+                    <form action="/admin/gallery" method="POST" enctype="multipart/form-data">
+                        <div class="row g-2">
+                            <div class="col-12 col-sm-6">
+                                <input type="text" name="title" class="form-control border-2 shadow-none" placeholder="Photo Title" required>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <input type="file" name="image" class="form-control border-2 shadow-none" required>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-teal w-100 fw-bold mt-2 py-2">Add to Gallery</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-3 border-bottom">
+            <h6 class="mb-0 fw-bold text-muted small text-uppercase tracking-wider">Existing Photos</h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr class="small text-muted">
+                        <th class="ps-4">Preview</th>
+                        <th>Details</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(let s of allSliders) { %>
+                    <tr>
+                        <td class="ps-4">
+                            <div class="position-relative d-inline-block">
+                                <img src="<%= s.link %>" class="rounded-3 border" style="width: 70px; height: 45px; object-fit: cover;">
+                                <span class="badge bg-info text-dark position-absolute top-0 start-0 translate-middle-y x-small px-1">S</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-truncate" style="max-width: 150px;"><%= s.name %></div>
+                            <small class="text-muted d-block d-md-none">Slider Item</small>
+                        </td>
+                        <td class="text-center">
+                            <div class="form-check form-switch d-inline-block">
+                                <input class="form-check-input custom-switch" type="checkbox" onchange="window.location.href='/admin/toggle/slider/<%= s._id %>'" <%= s.isActive ? 'checked' : '' %>>
+                            </div>
+                        </td>
+                        <td class="text-end pe-4">
+                            <form action="/admin/delete/slider/<%= s._id %>?_method=DELETE" method="POST" class="d-inline">
+                                <button class="btn btn-outline-danger btn-sm border-0 py-2"><i class="fa-solid fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    <% } %>
+
+                    <% for(let g of allGallery) { %>
+                    <tr>
+                        <td class="ps-4">
+                            <div class="position-relative d-inline-block">
+                                <img src="<%= g.image %>" class="rounded-3 border" style="width: 70px; height: 50px; object-fit: cover;">
+                                <span class="badge bg-warning text-dark position-absolute top-0 start-0 translate-middle-y x-small px-1">G</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-truncate" style="max-width: 150px;"><%= g.title %></div>
+                            <small class="text-muted d-block d-md-none">Gallery Item</small>
+                        </td>
+                        <td class="text-center">
+                            <div class="form-check form-switch d-inline-block">
+                                <input class="form-check-input custom-switch" type="checkbox" onchange="window.location.href='/admin/toggle/gallery/<%= g._id %>'" <%= g.isActive ? 'checked' : '' %>>
+                            </div>
+                        </td>
+                        <td class="text-end pe-4">
+                            <form action="/admin/delete/gallery/<%= g._id %>?_method=DELETE" method="POST" class="d-inline">
+                                <button class="btn btn-outline-danger btn-sm border-0 py-2"><i class="fa-solid fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-teal { color: #007A83 !important; }
+    .btn-teal { background-color: #007A83; color: white; border: none; }
+    .btn-teal:hover { background-color: #005a61; color: white; transform: translateY(-1px); }
+    .custom-switch:checked { background-color: #007A83; border-color: #007A83; }
+    .x-small { font-size: 0.65rem; }
+
+    .alert-warning {
+        background-color: #fff9e6;
+        border-left: 5px solid #ffc107 !important;
+    }
+
+    /* Mobile Table Fix */
+    @media (max-width: 576px) {
+        .table img { width: 60px !important; height: 40px !important; }
+        .btn-teal { font-size: 0.85rem; }
+    }
+</style>
